@@ -1,0 +1,97 @@
+A51 MACRO ASSEMBLER  TRASH                                                                08/04/2014 15:45:35 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\trash.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab2\trash.asm SET(SMALL) DEBUG PRINT(.\trash.lst) OBJECT(.\trash.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 12001C            1     LCALL convertandwrite
+0003 7420              2     MOV A, #' '
+0005                   3     LCALL DATA_WRITE
+*** _______________________________^
+*** ERROR #A45 IN 3 (..\lab2\trash.asm, LINE 3): UNDEFINED SYMBOL (PASS-2)
+0008 E5F0              4     MOV A, B
+000A                   5     LCALL convert
+*** _______________________________^
+*** ERROR #A45 IN 5 (..\lab2\trash.asm, LINE 5): UNDEFINED SYMBOL (PASS-2)
+000D 7420              6     MOV A, #' '
+000F                   7     LCALL DATA_WRITE
+*** _______________________________^
+*** ERROR #A45 IN 7 (..\lab2\trash.asm, LINE 7): UNDEFINED SYMBOL (PASS-2)
+0012 E5D0              8     MOV A, PSW
+0014                   9     LCALL convertandwirte
+*** _______________________________^
+*** ERROR #A45 IN 9 (..\lab2\trash.asm, LINE 9): UNDEFINED SYMBOL (PASS-2)
+0017 7420             10     MOV A, #' '
+0019                  11     LCALL DATA_WRITE
+*** _______________________________^
+*** ERROR #A45 IN 11 (..\lab2\trash.asm, LINE 11): UNDEFINED SYMBOL (PASS-2)
+                      12     
+                      13     
+001C                  14     convertandwrite:
+001C F571             15     MOV 71H,A
+001E 540A             16     ANL A,#00ah
+0020 F572             17     MOV 72H,A
+                      18     
+0022 E571             19     MOV A,71H
+0024 54A0             20     ANL A,#0a0h
+0026 C4               21     SWAP A
+0027 F573             22     MOV 73H,A
+                      23     
+0029 E572             24     MOV A, 72H
+002B F5F0             25     MOV B, A
+002D C3               26     CLR C
+002E 940A             27     SUBB A, #0AH
+0030 4004             28     JC less
+0032 E5F0             29     MOV A,B
+0034 2437             30     ADD A,#37H
+0036 E5F0             31     less: MOV A,B
+0038 2430             32     ADD A,#30H
+003A F574             33     MOV 74H,A
+                      34     
+003C E573             35     MOV A, 73H
+003E F5F0             36     MOV B, A
+0040 C3               37     CLR C
+0041 940A             38     SUBB A, #0AH
+0043 4004             39     JC lessagain
+0045 E5F0             40     MOV A,B
+0047 2437             41     ADD A,#37H
+0049 E5F0             42     lessagain: MOV A,B
+004B 2430             43     ADD A,#30H
+004D F575             44     MOV 75H,A
+004F E574             45     MOV A, 74H
+0051                  46     LCALL DATA_WRITE
+*** _______________________________^
+*** ERROR #A45 IN 46 (..\lab2\trash.asm, LINE 46): UNDEFINED SYMBOL (PASS-2)
+A51 MACRO ASSEMBLER  TRASH                                                                08/04/2014 15:45:35 PAGE     2
+
+0054 E575             47     MOV A, 75H
+0056                  48     LCALL DATA_WRITE
+*** _______________________________^
+*** ERROR #A45 IN 48 (..\lab2\trash.asm, LINE 48): UNDEFINED SYMBOL (PASS-2)
+0059 22               49     ret
+*** WARNING #A41 IN 49 (..\lab2\trash.asm, LINE 49): MISSING 'END' STATEMENT
+A51 MACRO ASSEMBLER  TRASH                                                                08/04/2014 15:45:35 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+CONVERT. . . . . .    ----   -----       
+CONVERTANDWIRTE. .    ----   -----       
+CONVERTANDWRITE. .  C ADDR   001CH   A   
+DATA_WRITE . . . .    ----   -----       
+LESS . . . . . . .  C ADDR   0036H   A   
+LESSAGAIN. . . . .  C ADDR   0049H   A   
+PSW. . . . . . . .  D ADDR   00D0H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 7 ERROR(S)

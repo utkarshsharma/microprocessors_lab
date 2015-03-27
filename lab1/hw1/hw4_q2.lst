@@ -1,0 +1,70 @@
+A51 MACRO ASSEMBLER  HW4_Q2                                                               08/22/2014 00:28:00 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw4_q2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw4\hw4_q2.asm SET(SMALL) DEBUG PRINT(.\hw4_q2.lst) OBJECT(.\hw4_q2.obj
+                      ) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 0000H
+                       2             USING 0
+0000 021000            3             LJMP setup
+                       4     
+1000                   5             ORG 1000H       
+1000                   6     setup:
+1000 75900F            7             MOV P1, #0FH                    ;Initializing
+                       8             
+1003                   9     MAIN:
+1003 E590             10             MOV A, P1                               ;READ
+1005 540F             11             ANL A, #0FH
+1007 F8               12             MOV R0, A                               ;R0-->Time for which LED should be ON
+1008 7414             13             MOV A, #14h
+100A 98               14             SUBB A, R0
+100B D297             15             SETB P1.7
+                      16     
+100D                  17     on:
+100D 12101D           18             LCALL onems
+1010 D8FB             19             DJNZ R0, on
+                      20     
+1012 F9               21             MOV R1, A                               ;R1-->Time for which LED should be OFF
+1013 C297             22             CLR P1.7
+                      23                     
+                      24                     
+1015                  25     off:    
+1015 12101D           26             LCALL onems
+1018 D9FB             27             DJNZ R1, off    
+                      28     
+101A 021003           29             LJMP MAIN
+                      30     
+101D                  31     onems:                                          ;THIS LOOP GENERATES A DELAY OF 1MS
+101D 7EEA             32             MOV R6, # 0EAH
+101F 7F04             33             MOV R7, # 004D
+1021                  34     notdone:
+1021 DEFE             35             DJNZ R6, $
+1023 DFFC             36             DJNZ R7, notdone
+1025 22               37             RET
+                      38     
+                      39     END
+A51 MACRO ASSEMBLER  HW4_Q2                                                               08/22/2014 00:28:00 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+MAIN . . . . . . .  C ADDR   1003H   A   
+NOTDONE. . . . . .  C ADDR   1021H   A   
+OFF. . . . . . . .  C ADDR   1015H   A   
+ON . . . . . . . .  C ADDR   100DH   A   
+ONEMS. . . . . . .  C ADDR   101DH   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+SETUP. . . . . . .  C ADDR   1000H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

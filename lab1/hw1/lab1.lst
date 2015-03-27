@@ -1,0 +1,102 @@
+A51 MACRO ASSEMBLER  LAB1                                                                 09/22/2014 16:20:14 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE C:\Users\Utkarsh\Downloads\lab1.asm SET(SMALL) DEBUG PRINT(.\lab1.lst) OBJ
+                      ECT(.\lab1.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ; The tringular wave generation for DAC
+  00C3                 2     SPCON EQU 0C3H
+  00C4                 3     SPSTA EQU 0C4H
+  00C5                 4     SPDAT EQU 0C5H
+                       5     
+                       6     
+0000                   7     org 000h 
+0000 020100            8     ljmp Main 
+0100                   9     org 0100h  ; serial interrupt 
+                      10     
+0100                  11     Main:
+                      12             ; We need to generate the tringular wave's single step approximation
+0100 D2A1             13             SETB P2.1;
+0102 D2A2             14             SETB P2.2;
+0104 C2A0             15             CLR P2.0;
+0106 75C37D           16             MOV SPCON,#01111101B ; divide by 4
+                      17                     ; corrospond to 0.5ms/8 
+0109 7870             18                     MOV R0,#01110000B
+010B 7900             19                     MOV R1,#000H
+                      20                     
+010D                  21             DAC_up:         
+010D C2A1             22                     CLR P2.1
+010F 88C5             23                     MOV SPDAT,R0
+0111                  24                     wait4:
+0111 E5C4             25                     MOV A,SPSTA
+0113 30E7FB           26                     JNB ACC.7,wait4
+0116 89C5             27                     MOV SPDAT,R1
+0118                  28                     wait5:
+0118 E5C4             29                     MOV A,SPSTA
+011A 30E7FB           30                     JNB ACC.7,wait5
+011D D2A1             31                     SETB P2.1
+011F 120146           32                     lcall delayset
+                      33                     
+0122 08               34                     INC R0
+0123 B87FE7           35                     CJNE R0,#01111111b,DAC_up
+0126 120146           36                     lcall delayset
+                      37                     
+0129                  38             DAC_down:       
+0129 7900             39                     MOV R1,#000H
+012B 18               40                     DEC R0
+012C C2A1             41                     CLR P2.1
+012E 88C5             42                     MOV SPDAT,R0
+0130                  43                     wait41:
+0130 E5C4             44                     MOV A,SPSTA
+0132 30E7FB           45                     JNB ACC.7,wait41
+0135 89C5             46                     MOV SPDAT,R1
+0137                  47                     wait51:
+0137 E5C4             48                     MOV A,SPSTA
+0139 30E7FB           49                     JNB ACC.7,wait51
+013C D2A1             50                     SETB P2.1
+013E 120146           51                     lcall delayset
+                      52                     
+0141 B870E5           53                     CJNE R0,#01110000B,DAC_down
+0144 80BA             54                     jmp Main
+                      55                     
+0146                  56     delayset:
+0146 7C10             57             MOV R4,#010H
+A51 MACRO ASSEMBLER  LAB1                                                                 09/22/2014 16:20:14 PAGE     2
+
+0148                  58             delay:
+0148 DCFE             59                     DJNZ R4,delay
+014A 22               60                     ret
+                      61                             
+                      62     end             
+A51 MACRO ASSEMBLER  LAB1                                                                 09/22/2014 16:20:14 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+DAC_DOWN . . . . .  C ADDR   0129H   A   
+DAC_UP . . . . . .  C ADDR   010DH   A   
+DELAY. . . . . . .  C ADDR   0148H   A   
+DELAYSET . . . . .  C ADDR   0146H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+SPCON. . . . . . .  N NUMB   00C3H   A   
+SPDAT. . . . . . .  N NUMB   00C5H   A   
+SPSTA. . . . . . .  N NUMB   00C4H   A   
+WAIT4. . . . . . .  C ADDR   0111H   A   
+WAIT41 . . . . . .  C ADDR   0130H   A   
+WAIT5. . . . . . .  C ADDR   0118H   A   
+WAIT51 . . . . . .  C ADDR   0137H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

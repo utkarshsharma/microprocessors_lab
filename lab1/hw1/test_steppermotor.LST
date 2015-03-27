@@ -1,0 +1,121 @@
+A51 MACRO ASSEMBLER  TEST_STEPPERMOTOR                                                    08/18/2014 17:18:44 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN test_steppermotor.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE test_steppermotor.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00h
+                       2     USING 0
+0000 020100            3     LJMP setup
+                       4     
+0100                   5             ORG 100H        
+0100                   6     setup:
+0100 758901            7             MOV TMOD, #001h
+0103 D2A9              8             SETB ET0                        ;ENABLE INTERRUPTS FOR T1 AND T0
+0105 D2AF              9             SETB EA
+0107 7D10             10             MOV R5, #010H
+                      11             
+0109                  12     MAIN:
+0109 900123           13     MOV DPTR, #speed
+010C 7400             14     MOV A, #00h
+010E 7F00             15     MOV R7, #00H
+0110                  16     run:
+0110 EF               17     MOV A, R7
+0111 93               18     MOVC A, @A+DPTR
+0112 C4               19     SWAP A
+0113 F580             20     MOV P0, A
+0115 0F               21     INC R7
+0116                  22     runrun:
+0116 121500           23     LCALL hundredms
+0119 DDFB             24     DJNZ R5, runrun
+011B 7D10             25     MOV R5, #010H
+011D BF04F0           26     CJNE R7, #004h, run
+0120 020109           27     LJMP MAIN
+                      28     
+0123                  29     speed:
+0123 08040201         30     DB 08H, 04H, 02H, 01H, 08H, 04H
+0127 0804                    
+                      31     
+                      32     
+1500                  33     ORG 1500H
+1500                  34     hundredms:
+1500 C001             35             PUSH AR1
+1502 C002             36             PUSH AR2
+                      37     ;MOVING 00 TO TH0 AND TL0
+1504 758C00           38             MOV TH0, #00h   
+1507 758A00           39             MOV TL0, #00h
+                      40     
+150A D28C             41             SETB TR0                                        ;START TIMER1. STOPS ONLY WHEN 100m
+                             s ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+150C 7A04             42             MOV R2, #04h                                    ;NO. OF TIMES WE HAVE TO RUN T0 FRO
+                             M 00 TO FE FOR 100ms
+150E                  43     set_t1_again:
+150E DA02             44             DJNZ R2, t1loop                                 ;CHECKING IF 100ms ARE DONE
+1510 800D             45             sjmp hundms_done
+1512                  46     t1loop:
+                      47     ;RESET TH0 AND TL0 if 100ms NOT UP
+1512 758C00           48             MOV TH0, #00h
+1515 758A00           49             MOV TL0, #00h
+                      50     ;CHECK TH0 AND STOP IT FROM OVERFLOWING BECAUSE 100ms ARE NOT UP
+1518                  51     check_th1:
+1518 A98C             52             MOV R1, TH0
+151A B9FEFB           53             CJNE R1, #0feh, check_th1
+151D 80EF             54             SJMP set_t1_again
+                      55     ;NOW 100ms ALMOST DONE. WAIT FOR INTERRUPT0 TO BE CALLED. THAT IS, TR0 TO BECOME 0.
+A51 MACRO ASSEMBLER  TEST_STEPPERMOTOR                                                    08/18/2014 17:18:44 PAGE     2
+
+151F                  56     hundms_done:
+151F C3               57             CLR C
+1520 A28C             58             MOV C, TR0
+1522 5002             59             JNC exit                        ;condition check for whether 100ms are up
+1524 80F9             60             SJMP  hundms_done
+1526                  61     exit:
+1526 D002             62             POP AR2
+1528 D001             63             POP AR1
+152A 22               64             RET
+                      65             
+                      66             
+000B                  67             ORG 000BH               
+000B                  68     ISR0:
+000B C28C             69             CLR TR0
+000D 32               70             RETI
+                      71     
+                      72     END
+A51 MACRO ASSEMBLER  TEST_STEPPERMOTOR                                                    08/18/2014 17:18:44 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AR1. . . . . . . .  D ADDR   0001H   A   
+AR2. . . . . . . .  D ADDR   0002H   A   
+CHECK_TH1. . . . .  C ADDR   1518H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EXIT . . . . . . .  C ADDR   1526H   A   
+HUNDMS_DONE. . . .  C ADDR   151FH   A   
+HUNDREDMS. . . . .  C ADDR   1500H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+MAIN . . . . . . .  C ADDR   0109H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+RUN. . . . . . . .  C ADDR   0110H   A   
+RUNRUN . . . . . .  C ADDR   0116H   A   
+SETUP. . . . . . .  C ADDR   0100H   A   
+SET_T1_AGAIN . . .  C ADDR   150EH   A   
+SPEED. . . . . . .  C ADDR   0123H   A   
+T1LOOP . . . . . .  C ADDR   1512H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

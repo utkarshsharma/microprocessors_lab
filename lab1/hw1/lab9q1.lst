@@ -1,0 +1,400 @@
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LAB9Q1
+OBJECT MODULE PLACED IN .\lab9q1.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\lab9\lab9q1.c BROWSE DEBUG OBJECTEXTEND PRINT(.\lab9q1.lst) TABS(2) OBJE
+                    -CT(.\lab9q1.obj)
+
+line level    source
+
+   1          #include<AT89C5131.h>
+   2          #include<stdio.h>
+   3          
+   4          
+   5          #define SEC   0x00
+   6          #define MIN   0x01  
+   7          #define HOUR  0x02
+   8          #define DAY   0x03
+   9          #define DATE  0x04
+  10          #define MONTH 0x05
+  11          #define YEAR  0x06
+  12          
+  13          //*******DECLARING VARIABLES**********************************
+  14          
+  15            sbit RS = P0^0;
+  16            sbit RW = P0^1;
+  17            sbit EN = P0^2;
+  18            int displayvar[] = {15,22,59,1,29,9,14};
+  19          
+  20          //*******DECLARING FUNCTIONS**********************************
+  21          
+  22          
+  23            void LCD_READY();
+  24            void msdelay(unsigned int time);
+  25            void tenmsdelay(unsigned int time);
+  26            void lcd_init();
+  27            void CMD_WRITE(unsigned char command);
+  28            void DATA_WRITE(unsigned char character); 
+  29            void STRING_WRITE(unsigned char character);
+  30            void send2lcd(unsigned char value);
+  31          
+  32            void I2C_clock();
+  33            void I2C_start();
+  34            void I2C_stop();
+  35            unsigned char I2C_read(void);
+  36            bit I2C_write(unsigned char dat);
+  37          
+  38            
+  39            /************** DEFINING DS1307 FUCTION****************************************/
+  40          
+  41          
+  42          
+  43          
+  44          #define DS1307_ID 0xD0  
+  45          
+  46          unsigned char DS1307_get(unsigned char addr)
+  47          {
+  48   1        unsigned char ret;  
+  49   1      
+  50   1        I2C_start();            /* Start i2c bus */
+  51   1      
+  52   1        I2C_write(DS1307_ID);   /* Connect to DS1307 */
+  53   1        I2C_write(addr);    /* Request RAM address on DS1307 */
+  54   1        
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 2   
+
+  55   1        I2C_start();      /* Start i2c bus */
+  56   1      
+  57   1        I2C_write(DS1307_ID+1); /* Connect to DS1307 for Read */
+  58   1        ret = I2C_read();   /* Receive data */
+  59   1        
+  60   1        I2C_stop();       /* Stop i2c bus */
+  61   1      
+  62   1         return ret;      
+  63   1      }
+  64          
+  65          
+  66          
+  67          /***************************** Main function *************************************/
+  68          void main()     
+  69          {
+  70   1        unsigned int sec, min, hour, day, date, month, year;
+  71   1          
+  72   1          /* Get Date & Time */
+  73   1          sec   = DS1307_get(SEC);  
+  74   1          min   = DS1307_get(MIN);  
+  75   1          hour  = DS1307_get(HOUR);
+  76   1          day   = DS1307_get (DAY);
+  77   1          date  = DS1307_get(DATE);
+  78   1          month = DS1307_get(MONTH);
+  79   1          year  = DS1307_get(YEAR);
+  80   1        
+  81   1        lcd_init();
+  82   1        
+  83   1        while(1) 
+  84   1        {
+  85   2            switch(day)
+  86   2            {
+  87   3                case 1:   
+  88   3                    STRING_WRITE("MON ");
+*** WARNING C214 IN LINE 88 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+  89   3                    break;
+  90   3                case 2:   
+  91   3                    STRING_WRITE("TUE ");
+*** WARNING C214 IN LINE 91 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+  92   3                    break;
+  93   3                case 3:   
+  94   3                    STRING_WRITE("WED ");
+*** WARNING C214 IN LINE 94 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+  95   3                    break;
+  96   3                case 4:   
+  97   3                    STRING_WRITE("THU ");
+*** WARNING C214 IN LINE 97 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+  98   3                    break;
+  99   3                case 5:   
+ 100   3                    STRING_WRITE("FRI ");
+*** WARNING C214 IN LINE 100 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+ 101   3                    break;
+ 102   3                case 6:   
+ 103   3                    STRING_WRITE("SAT ");
+*** WARNING C214 IN LINE 103 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+ 104   3                    break;
+ 105   3                case 7:   
+ 106   3                    STRING_WRITE("SUN ");
+*** WARNING C214 IN LINE 106 OF ..\lab9\lab9q1.c: 'Argument': conversion: pointer to non-pointer
+ 107   3                    break;
+ 108   3                default:
+ 109   3                    break;
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 3   
+
+ 110   3            }
+ 111   2            
+ 112   2      
+ 113   2          /* Show Date in format dd/mm/yr */
+ 114   2          CMD_WRITE(0x86);  /* Set LCD cursor at (1,6) */
+ 115   2          
+ 116   2          send2lcd(date);   /* Show date on LCD */
+ 117   2          
+ 118   2          DATA_WRITE(' ');    
+ 119   2          
+ 120   2          send2lcd(month);  /* Show month on LCD */
+ 121   2          
+ 122   2          DATA_WRITE(' ');  
+ 123   2          
+ 124   2          send2lcd(year);   /* Show year on LCD */
+ 125   2      
+ 126   2          /* Show Time in format hr:min:sec */  
+ 127   2          CMD_WRITE(0xC6);  /* Set LCD cursor at (2,6) */
+ 128   2          
+ 129   2          send2lcd(hour);   /* Show hour on LCD */
+ 130   2          
+ 131   2          DATA_WRITE(':');       
+ 132   2              
+ 133   2          send2lcd(min);    /* Show min on LCD */
+ 134   2          
+ 135   2          DATA_WRITE(':');    
+ 136   2          
+ 137   2          send2lcd(sec);    /* Show sec on LCD */
+ 138   2        }    
+ 139   1      } /* End main */
+ 140          
+ 141          
+ 142          
+ 143          
+ 144          
+ 145          
+ 146          
+ 147          void send2lcd(unsigned char value)
+ 148          {
+ 149   1        unsigned char buf = 0;  
+ 150   1        
+ 151   1        buf = value & 0xF0;       /* Filter for high byte */
+ 152   1        buf = (buf>>4)|(0x30);    /* Convert  to ascii code */
+ 153   1      
+ 154   1        DATA_WRITE(buf);            /* Show on LCD */
+ 155   1      
+ 156   1        buf = value & 0x0F;       /* Filter for low byte */
+ 157   1        buf = buf | 0x30;         /* Convert to ascii code */
+ 158   1      
+ 159   1        DATA_WRITE(buf);            /* Show on LCD */
+ 160   1      } 
+ 161          
+ 162          
+ 163          
+ 164          
+ 165          
+ 166          
+ 167          
+ 168          
+ 169          
+ 170          
+ 171          
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 4   
+
+ 172          
+ 173          /*********************** DEFINING I2C FUNCTIONS **********************************************************
+             -/
+ 174          
+ 175          
+ 176          
+ 177          #define SDA P2_7    /* Set P2.7 = SDA */
+ 178          #define SCL P2_6    /* Set P2.6 = SCL */
+ 179          
+ 180          void I2C_clock()
+ 181          {
+ 182   1        delay();
+*** WARNING C206 IN LINE 182 OF ..\lab9\lab9q1.c: 'delay': missing function-prototype
+ 183   1        SCL = 1;    /* Start clock */
+ 184   1        delay();    
+ 185   1        SCL = 0;    /* Clear SCL */
+ 186   1      }
+ 187          
+ 188          void I2C_start()
+ 189          {
+ 190   1        if(SCL)
+ 191   1        SCL = 0;        /* Clear SCL */
+ 192   1        SDA = 1;        /* Set SDA */
+ 193   1        SCL = 1;        /* Set SCL */
+ 194   1        delay(); 
+ 195   1        SDA = 0;        /* Clear SDA */
+ 196   1        delay(); 
+ 197   1        SCL = 0;        /* Clear SCL */
+ 198   1      }
+ 199          
+ 200          void I2C_stop()
+ 201          {
+ 202   1        if(SCL) 
+ 203   1        SCL = 0;        /* Clear SCL */
+ 204   1        SDA = 0;        /* Clear SDA */
+ 205   1        delay();
+ 206   1        SCL = 1;        /* Set SCL */
+ 207   1        delay();
+ 208   1        SDA = 1;        /* Set SDA */
+ 209   1      }
+ 210          
+ 211          bit I2C_write(unsigned char dat)
+ 212          {
+ 213   1        bit data_bit;   
+ 214   1        unsigned char i;  
+ 215   1      
+ 216   1        for(i=0;i<8;i++)        /* For loop 8 time(send data 1 byte) */
+ 217   1        {
+ 218   2          data_bit = dat & 0x80;    /* Filter MSB bit keep to data_bit */
+ 219   2          SDA = data_bit;       /* Send data_bit to SDA */
+ 220   2          I2C_clock();            /* Call for send data to i2c bus */
+ 221   2          dat = dat<<1;  
+ 222   2        }
+ 223   1        SDA = 1;      /* Set SDA */
+ 224   1        delay();  
+ 225   1        SCL = 1;      /* Set SCL */
+ 226   1        delay();  
+ 227   1        data_bit = SDA;     /* Check acknowledge */
+ 228   1        SCL = 0;      /* Clear SCL */
+ 229   1        delay();
+ 230   1        return data_bit;  /* If send_bit = 0 i2c is valid */      
+ 231   1      }
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 5   
+
+ 232          
+ 233          unsigned char I2C_read()
+ 234          {
+ 235   1        bit rd_bit; 
+ 236   1        unsigned char i, dat;
+ 237   1        dat = 0x00; 
+ 238   1      
+ 239   1        for(i=0;i<8;i++)    /* For loop read data 1 byte */
+ 240   1        {
+ 241   2          delay();
+ 242   2          SCL = 1;      /* Set SCL */
+ 243   2          delay(); 
+ 244   2          rd_bit = SDA;   /* Keep for check acknowledge */
+ 245   2          dat = dat<<1;   
+ 246   2          dat = dat | rd_bit; /* Keep bit data in dat */
+ 247   2          SCL = 0;      /* Clear SCL */
+ 248   2        }
+ 249   1        return dat;
+ 250   1      }
+ 251          
+ 252          
+ 253          
+ 254          
+ 255          
+ 256          
+ 257          
+ 258          
+ 259          
+ 260          
+ 261          
+ 262          
+ 263          
+ 264          
+ 265          
+ 266          
+ 267          
+ 268          
+ 269          //*******DEFINING LCD FUNCTIONS**********************************
+ 270          
+ 271          //*******LCD INITIALIZATION**********************************
+ 272          
+ 273          void lcd_init()
+ 274            {
+ 275   1          unsigned char a;
+ 276   1          a = 0x38;
+ 277   1          CMD_WRITE(a);    //2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+ 278   1          
+ 279   1          a = 0x0E;
+ 280   1          CMD_WRITE(a);   //TURN ON DISPLAY, CURSOR NOT BLINKING
+ 281   1        
+ 282   1          a = 0x06;       //INCREMENTING THE CURSOR POSITION
+ 283   1          CMD_WRITE(a); 
+ 284   1      
+ 285   1          
+ 286   1          a = 0x01;       //CLEAR SCREEN
+ 287   1          CMD_WRITE(a);
+ 288   1        }
+ 289          
+ 290          
+ 291          //*******ONE MILLISECOND DELAY**********************************
+ 292          void msdelay(unsigned int time)
+ 293          {
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 6   
+
+ 294   1        unsigned int i,j;
+ 295   1        for(i=0;i<time;i++)
+ 296   1          for(j=0;j<1275;j++);
+ 297   1      }
+ 298          
+ 299          //*******TEN MILLISECOND DELAY**********************************
+ 300          void tenmsdelay(unsigned int time){
+ 301   1        unsigned int i;
+ 302   1        for(i=0;i<time;i++)
+ 303   1          msdelay(10);
+ 304   1      }
+ 305          
+ 306          //*******WRITING A COMMAND TO THE LCD**********************************
+ 307          void CMD_WRITE(unsigned char command)
+ 308          { 
+ 309   1        LCD_READY();
+ 310   1        tenmsdelay(10);
+ 311   1        P2 = command;
+ 312   1        RS = 0;
+ 313   1        RW = 0;
+ 314   1        EN = 1;
+ 315   1        msdelay(1);
+ 316   1        EN = 0; 
+ 317   1        msdelay(1);
+ 318   1      }
+ 319          
+ 320          //*******WRITING DATA TO THE LCD**********************************
+ 321          void DATA_WRITE(unsigned char character)
+ 322          {
+ 323   1        LCD_READY();
+ 324   1        tenmsdelay(1);
+ 325   1        P2 = character;
+ 326   1        RS = 1;
+ 327   1        RW = 0;
+ 328   1        EN = 1;
+ 329   1        msdelay(1);
+ 330   1        EN = 0;
+ 331   1        msdelay(1);
+ 332   1      }
+ 333          
+ 334          void LCD_READY()
+ 335            {
+ 336   1            int i,j;
+ 337   1            unsigned char a = 0xff;
+ 338   1            P2 = 0xFF;            
+ 339   1            RS = 0;               
+ 340   1            RW = 1;               
+ 341   1            for( i=0; i<=75 ; i++)
+ 342   1          {
+ 343   2            for (j=0; j<=10 ; j++);
+ 344   2          }
+ 345   1            EN = 0;
+ 346   1          }
+ 347              
+ 348          void STRING_WRITE(unsigned char *lcd_string)
+ 349          {
+*** WARNING C235 IN LINE 349 OF ..\lab9\lab9q1.c: parameter 1: different types
+ 350   1        while (*lcd_string) 
+ 351   1        {
+ 352   2          DATA_WRITE(*lcd_string++);
+ 353   2        }
+ 354   1      }
+C51 COMPILER V9.52.0.0   LAB9Q1                                                            10/07/2014 05:49:25 PAGE 7   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    635    ----
+   CONSTANT SIZE    =     35    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     14      29
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  9 WARNING(S),  0 ERROR(S)

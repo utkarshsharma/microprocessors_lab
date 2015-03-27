@@ -1,0 +1,63 @@
+A51 MACRO ASSEMBLER  TEST_ONEMS                                                           08/18/2014 05:06:59 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN test_onems.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE test_onems.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 00H
+0000 020100            2             LJMP MAIN
+                       3     
+0100                   4             ORG 100H
+0100                   5     MAIN:
+0100 758901            6             MOV TMOD, #01h
+0103 D2A9              7             SETB ET0
+0105 D2AF              8             SETB EA
+0107                   9     onems:
+                      10     ;MOVING 00 TO TH0 AND TL0
+0107 758CF5           11             MOV TH0, #0f5h  
+010A 758AB5           12             MOV TL0, #0b5h
+010D D28C             13             SETB TR0                                        ;START TIMER1. STOPS ONLY WHEN 100m
+                             s ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+010F                  14     onems_done:
+010F C3               15             CLR C
+0110 A28C             16             MOV C, TR0
+0112 5002             17             JNC exit                                        ;condition check for whether 1ms ar
+                             e up
+0114 80F9             18             SJMP  onems_done
+0116                  19     exit:
+0116 22               20             RET
+                      21             
+0117 020107           22     ljmp onems      
+000B                  23             ORG 000BH               
+000B                  24     ISR0:
+000B C28C             25             CLR TR0
+000D 32               26             RETI
+                      27     END
+A51 MACRO ASSEMBLER  TEST_ONEMS                                                           08/18/2014 05:06:59 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EXIT . . . . . . .  C ADDR   0116H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+ONEMS. . . . . . .  C ADDR   0107H   A   
+ONEMS_DONE . . . .  C ADDR   010FH   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

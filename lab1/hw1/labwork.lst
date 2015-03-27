@@ -1,0 +1,297 @@
+A51 MACRO ASSEMBLER  LABWORK                                                              09/02/2014 18:11:48 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\labwork.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE C:\Users\Utkarsh\Downloads\labwork.asm SET(SMALL) DEBUG PRINT(.\labwork.ls
+                      t) OBJECT(.\labwork.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;lab 6- serial communication
+                       2     ;NIKLESH LALWANI
+                       3     ;12D070029
+                       4     
+  0080                 5     RS EQU P0.0
+  0081                 6     RW EQU P0.1
+  0082                 7     EN EQU P0.2
+                       8     
+                       9     
+0000                  10     ORG 0000H
+0000 0203E8           11     LJMP STORE_NAME
+                      12     
+                      13     
+0023                  14     ORG 0023H                ;SERIAL INTERRUPT ADDRESS
+0023 020810           15     LJMP SERIAL_ISR               ;CALLED WHEN TI=1
+                      16     
+                      17     
+03E8                  18     ORG 1000
+03E8                  19     STORE_NAME:        ;for storing the name
+03E8 7851             20     MOV R0, #51H
+                      21     ;MOV @R0, #'-'
+                      22     ;INC R0
+03EA 764E             23     MOV @R0, #'N'
+03EC 08               24     INC R0
+03ED 7649             25     MOV @R0, #'I'
+03EF 08               26     INC R0
+03F0 764B             27     MOV @R0, #'K'
+03F2 08               28     INC R0
+03F3 764C             29     MOV @R0, #'L'
+03F5 08               30     INC R0
+03F6 7645             31     MOV @R0, #'E'
+03F8 08               32     INC R0
+03F9 7653             33     MOV @R0, #'S'
+03FB 08               34     INC R0
+03FC 7648             35     MOV @R0, #'H'
+03FE 08               36     INC R0
+03FF 7631             37     MOV @R0, #'1'
+0401 08               38     INC R0
+0402 7632             39     MOV @R0, #'2'
+0404 08               40     INC R0
+0405 7633             41     MOV @R0, #'3'
+0407 08               42     INC R0
+0408 7634             43     MOV @R0, #'4'
+040A 08               44     INC R0
+040B 7635             45     MOV @R0, #'5'
+040D 08               46     INC R0
+040E 7636             47     MOV @R0, #'6'
+0410 08               48     INC R0
+0411 7637             49     MOV @R0, #'7'
+0413 08               50     INC R0
+0414 7638             51     MOV @R0, #'8'
+                      52     
+0416 02083F           53     LJMP MAIN
+                      54     
+                      55     
+07D0                  56     ORG 2000
+                      57     
+A51 MACRO ASSEMBLER  LABWORK                                                              09/02/2014 18:11:48 PAGE     2
+
+07D0                  58     CMD_WRITE:  
+07D0 F1FF             59     ACALL LCD_READY
+07D2 F5A0             60     MOV P2, A
+07D4 C280             61     CLR RS
+07D6 C281             62     CLR RW
+07D8 D282             63     SETB EN
+                      64     ;LCALL DELAY 
+07DA C282             65     CLR EN
+07DC 22               66     RET
+                      67     
+07DD                  68     DATA_WRITE: 
+07DD F1FF             69     ACALL LCD_READY
+07DF F5A0             70     MOV P2, A
+07E1 D280             71     SETB RS
+07E3 C281             72     CLR RW
+07E5 D282             73     SETB EN
+07E7 C282             74     CLR EN
+07E9 22               75     RET
+                      76     
+07EA                  77     INIT_LCD:
+07EA 7438             78     MOV A, #38H     ;2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+07EC 1207D0           79     LCALL CMD_WRITE
+07EF 740E             80     MOV A, #0EH     ;TURN ON DISPLAY, CURSOR NOT BLINKING
+07F1 1207D0           81     LCALL CMD_WRITE
+07F4 7406             82     MOV A, #06H     ;INCREMENTING THE CURSOR POSITION
+07F6 1207D0           83     LCALL CMD_WRITE
+07F9 7401             84     MOV A, #1H      ;CLEAR SCREEN
+07FB 1207D0           85     LCALL CMD_WRITE
+07FE 22               86     RET
+                      87     
+                      88     ;FOLLOWING SUB-ROUTINE CHECKS BUSY_FLAG AND WAITS TILL LCD IS READY
+                      89     
+07FF                  90     LCD_READY:
+07FF 75A0FF           91     MOV P2,#0FFH    ;MAKE P2.7 AS INPUT
+0802 C280             92     CLR RS          ;SELECT COMMAND REGISTER
+0804 D281             93     SETB RW         ;TO READ FROM LCD
+0806                  94     CHECK:  
+0806 C282             95     CLR EN
+0808 D282             96     SETB EN
+080A 20A7F9           97     JB P2.7, CHECK  ;READ BUSY FLAG UNTIL IT BECOMES ZERO
+080D C282             98     CLR EN
+080F 22               99     RET
+                     100     
+0810                 101     SERIAL_ISR:
+                     102             
+0810 209917          103             JB TI, EXIT
+0813 309814          104             JNB RI, EXIT
+0816 BB0F07          105             CJNE R3, #0FH, CONTINUE
+0819 7B00            106             MOV R3, #00H
+081B 7480            107             MOV A, #080H
+081D 1207D0          108             LCALL CMD_WRITE
+                     109             
+0820                 110     CONTINUE:       
+0820 0B              111             INC R3  
+0821 E599            112             MOV A, SBUF; Save this character
+0823 F7              113             MOV @R1,A
+0824 09              114             INC R1
+                     115             ;ACALL CONVERT
+                     116             ;MOV A, R6
+                     117             ;LCALL DATA_WRITE
+                     118             ;MOV A, R5
+0825 1207DD          119             LCALL DATA_WRITE
+0828 C298            120             CLR RI ; clear receive interrupt flag
+082A                 121     EXIT:
+                     122     
+082A 32              123     RETI    
+A51 MACRO ASSEMBLER  LABWORK                                                              09/02/2014 18:11:48 PAGE     3
+
+                     124     
+                     125             
+082B                 126     DELAY_10:        ; 10 MS DELAY  
+082B 7D0A            127             MOV R5, #10
+082D                 128     LOOP:
+082D 758CFF          129                     MOV TH0, #0FFH
+0830 758A40          130                     MOV TL0, #40H
+0833 D28C            131                     SETB TR0
+0835 308DFD          132                     AGAIN: JNB TF0,AGAIN
+0838 C28C            133                     CLR TR0
+083A C28D            134                     CLR TF0
+083C DDEF            135                     DJNZ R5, LOOP   
+083E 22              136     RET
+                     137     
+083F                 138     MAIN:
+                     139     
+083F 1207EA          140             LCALL INIT_LCD          ;initialise lcd
+                     141             
+0842 759850          142             MOV SCON, #050H  ;serial port mode 3, receiver enabled
+                     143     
+0845 758921          144             MOV TMOD, #21H     ;configure timer 1 in auto-reload mode for 1200 baud  ; TIMER 0 
+                             AS 16 BIT COUNTER
+                     145     
+0848 758DCC          146             MOV TH1, #0CCH      ;reload value for 1200 baud
+                     147             
+084B 7590FF          148             MOV P1,#0FFH           ;USE SWITCHES AS INput
+                     149     
+084E D2AF            150             SETB EA            ;Enable interrupts
+0850 D2AC            151             SETB ES      ; ENABLE SERIAL INTERRUPT
+                     152             
+0852 7B00            153             MOV R3,#00H         
+0854 D28E            154             SETB TR1            ;start timer
+                     155             
+0856 7961            156             MOV R1, #61H
+                     157             
+0858 E590            158             MOV A, P1
+085A 540F            159             ANL A, #0FH
+085C FA              160             MOV R2, A       
+                     161             
+085D                 162     LCD_TRANSMITTED:
+085D 74C0            163             MOV A, #0C0H
+085F 1207D0          164             LCALL CMD_WRITE
+0862 7851            165             MOV R0, #51H
+0864                 166     LOOP_NAME:
+0864 E6              167             MOV A,@R0
+0865 1207DD          168             LCALL DATA_WRITE
+0868 08              169             INC R0
+0869 B860F8          170             CJNE R0, #60H, LOOP_NAME
+086C 7480            171             MOV A, #080H
+086E 1207D0          172             LCALL CMD_WRITE
+                     173             
+0871                 174     SWITCHES:
+0871 7590FF          175             MOV P1, #0FFH
+0874 B97003          176             CJNE R1, #70H, GO_ON
+0877 0208AB          177             LJMP RECIEVED
+087A                 178     GO_ON:
+087A E590            179             MOV A, P1
+087C 540F            180             ANL A, #0FH
+087E B50203          181             CJNE A, 0X02, RECHECK         ;CHECK FOR DEBOUNCING
+0881 020871          182             LJMP SWITCHES
+                     183             
+0884                 184     RECHECK:
+0884 7590FF          185             MOV P1,#0FFH
+0887 12082B          186             LCALL DELAY_10
+088A FC              187             MOV R4, A
+088B E590            188             MOV A, P1
+A51 MACRO ASSEMBLER  LABWORK                                                              09/02/2014 18:11:48 PAGE     4
+
+088D 540F            189             ANL A, #0FH
+088F B504DF          190             CJNE A, 0X04, SWITCHES         ;IF DIFFERENT, GO BACK TO CHECK AGAIN
+0892 020895          191             LJMP TRANSMIT
+                     192             
+0895                 193     TRANSMIT:
+0895 C299            194             CLR TI
+0897 C298            195             CLR RI
+0899 FA              196             MOV R2, A
+089A 7851            197             MOV R0, #51H
+089C                 198     LOOP_NAME2:
+089C E6              199             MOV  A, @R0
+089D F599            200             MOV SBUF, A
+089F 3099FD          201     HERE: JNB TI, HERE
+08A2 C299            202             CLR TI
+08A4 08              203             INC R0
+08A5 B860F4          204             CJNE R0, #60H, LOOP_NAME2
+08A8 020871          205             LJMP SWITCHES
+                     206             
+08AB                 207     RECIEVED:
+08AB 7480            208             MOV A, #80H
+08AD 1207D0          209             LCALL CMD_WRITE
+08B0 7961            210             MOV R1, #61H
+08B2                 211     WRITE:
+08B2 E7              212             MOV A, @R1
+08B3 1207DD          213             LCALL DATA_WRITE
+08B6 09              214             INC R1
+08B7 B970F8          215             CJNE R1, #70H, WRITE
+08BA 7961            216             MOV R1, #061H
+08BC 7480            217             MOV A, #80H
+08BE 1207D0          218             LCALL CMD_WRITE
+08C1 020871          219             LJMP SWITCHES
+                     220             
+                     221             
+                     222             
+                     223     
+                     224     END
+A51 MACRO ASSEMBLER  LABWORK                                                              09/02/2014 18:11:48 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AGAIN. . . . . . .  C ADDR   0835H   A   
+CHECK. . . . . . .  C ADDR   0806H   A   
+CMD_WRITE. . . . .  C ADDR   07D0H   A   
+CONTINUE . . . . .  C ADDR   0820H   A   
+DATA_WRITE . . . .  C ADDR   07DDH   A   
+DELAY_10 . . . . .  C ADDR   082BH   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+EN . . . . . . . .  B ADDR   0080H.2 A   
+ES . . . . . . . .  B ADDR   00A8H.4 A   
+EXIT . . . . . . .  C ADDR   082AH   A   
+GO_ON. . . . . . .  C ADDR   087AH   A   
+HERE . . . . . . .  C ADDR   089FH   A   
+INIT_LCD . . . . .  C ADDR   07EAH   A   
+LCD_READY. . . . .  C ADDR   07FFH   A   
+LCD_TRANSMITTED. .  C ADDR   085DH   A   
+LOOP . . . . . . .  C ADDR   082DH   A   
+LOOP_NAME. . . . .  C ADDR   0864H   A   
+LOOP_NAME2 . . . .  C ADDR   089CH   A   
+MAIN . . . . . . .  C ADDR   083FH   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+RECHECK. . . . . .  C ADDR   0884H   A   
+RECIEVED . . . . .  C ADDR   08ABH   A   
+RI . . . . . . . .  B ADDR   0098H.0 A   
+RS . . . . . . . .  B ADDR   0080H.0 A   
+RW . . . . . . . .  B ADDR   0080H.1 A   
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SERIAL_ISR . . . .  C ADDR   0810H   A   
+STORE_NAME . . . .  C ADDR   03E8H   A   
+SWITCHES . . . . .  C ADDR   0871H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+TRANSMIT . . . . .  C ADDR   0895H   A   
+WRITE. . . . . . .  C ADDR   08B2H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

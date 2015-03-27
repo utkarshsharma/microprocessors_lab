@@ -1,0 +1,8 @@
+"STARTUP.obj",
+"rtc.obj",
+"i2c.obj",
+"delay.obj",
+"lcd.obj",
+"Source.obj" 
+TO "lab8" 
+RAMSIZE(256) 

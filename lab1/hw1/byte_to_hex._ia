@@ -1,0 +1,1 @@
+"C:\Users\Utkarsh\Downloads\byte_to_hex.asm" SET (SMALL) DEBUG PRINT(.\byte_to_hex.lst) OBJECT(.\byte_to_hex.obj) EP

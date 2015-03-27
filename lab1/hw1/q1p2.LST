@@ -1,0 +1,59 @@
+A51 MACRO ASSEMBLER  Q1P2                                                                 07/28/2014 16:08:34 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN q1p2.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE q1p2.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 7881              1     MOV r0,#81h
+0002 7982              2     MOV r1,#82h
+0004 7601              3     MOV @r0,#001h
+0006 7702              4     MOV @r1,#002h
+                       5     
+0008 E6                6     mov A,@r0
+0009 FA                7     mov r2,A
+                       8     
+000A E7                9     mov A, @r1
+000B FB               10     mov r3, A
+                      11     
+000C 7C00             12     mov r4,#000h
+000E 7D00             13     mov r5,#000h
+                      14     
+0010 BC000E           15     cjne r4,#000h,countup2
+0013 8000             16     sjmp countup1
+                      17     
+0015 0D               18     countup1:INC r5
+0016 ED               19     mov A, r5
+0017 B4FFFB           20     CJNE A,#0ffh,countup1
+001A 7D00             21     MOV r5,#000h
+001C 0C               22     INC r4
+001D EC               23     mov A,r4
+001E B502F4           24     cjne A,0x02,countup1
+                      25     
+0021 0D               26     countup2:INC r5
+0022 ED               27     mov A,r5
+0023 B503FB           28     cjne A,0x03,countup2
+                      29     
+                      30     end
+                             
+                             
+                             end
+*** WARNING #A73 IN 33 (q1p2.asm, LINE 33): TEXT FOUND BEYOND END STATEMENT - IGNORED
+A51 MACRO ASSEMBLER  Q1P2                                                                 07/28/2014 16:08:34 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+COUNTUP1 . . . . .  C ADDR   0015H   A   
+COUNTUP2 . . . . .  C ADDR   0021H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 0 ERROR(S)

@@ -1,0 +1,244 @@
+A51 MACRO ASSEMBLER  LAB3_Q2                                                              08/12/2014 20:43:34 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab3_q2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab3\lab3_q2.asm SET(SMALL) DEBUG PRINT(.\lab3_q2.lst) OBJECT(.\lab3_q2
+                      .obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             org 00h
+0000 020050            2             ljmp main
+                       3             USING 0 ;ASSEMBLER DIRECTIVE TO INDICATE REGISTER BANK0
+                       4     
+0050                   5             org 50h
+0050                   6     main:
+0050 7400              7             MOV A, #000h            ;CLEAR ACC
+0052 7D00              8             MOV R5, #000h           ;R5 is going to be our counter for reading Address and Dura
+                             tion from DATA2
+0054 758901            9             MOV TMOD,#001h          ;16 bit counter mode
+0057                  10     endofinterrupts:
+0057 122000           11             LCALL read
+                      12     ;read function called. Program will  now read duration and index from DATA2
+                      13     
+005A 905000           14             MOV DPTR, #DATA1
+                      15     
+005D                  16     loop:
+005D EF               17             MOV A,R7
+005E 93               18             MOVC A, @A+DPTR                 ;READING FROM DATA1 USING INDEX STORED IN R7
+005F FC               19             MOV R4,A                                ;LSB
+0060 EF               20             MOV A, R7
+0061 04               21             INC A
+0062 0F               22             INC R7
+0063 93               23             MOVC A, @A+DPTR
+0064 FB               24             MOV R3,A                                ;MSB
+                      25     
+                      26     ;THE FUNCTION twoscomp TAKES TWO BYTES AS INPUT IN R3(MSB) ad R4(LSB)
+0065 12201B           27             LCALL twoscomp
+                      28     ;THE FUNCTION twoscomp RETURNS THE 2's COMPLIMENTS OF THE TWO BYTES IN R3(MSB) ad R4(LSB)
+                      29     
+                      30     ;STORING FREQUENCY OF SIGNAL AT TEMPORARY MEMORY LOCATIONS AS TH0 AND TL0 WILL HAVE TO BE R
+                             ESET AGAIN MANY TIMES UNTIL WE HAVE TO READ AGAIN
+                      31     ;AND R3 AND R4 ARE GOING TO BE USED AGAIN IN SETTING TH1 AND TL1
+0068 8B71             32             MOV 71H,R3
+006A 8C72             33             MOV 72H,R4
+                      34     
+                      35     ;ENABLE INTERRUPTS FOR T1 AND T0
+006C D2AB             36             SETB ET1
+006E D2A9             37             SETB ET0
+0070 D2AF             38             SETB EA
+                      39     
+                      40     ;SET FREQUENCY FOR SQUARE WAVE
+0072 8B8C             41             MOV TH0,R3
+0074 8C8A             42             MOV TL0,R4
+0076 D287             43             SETB P0.7
+                      44     
+0078 7BFF             45             MOV R3, #0ffh
+007A 7CFF             46             MOV R4, #0ffh
+007C 12201B           47             LCALL twoscomp
+                      48     
+007F                  49     sq_wave:
+007F 122031           50             LCALL hundredms
+0082 DEFB             51             DJNZ R6,sq_wave                 ;REPEATING 100ms LOOP FOR THE NUMBER OF TIMES REQUI
+                             RED
+0084 C28C             52             CLR TR0                                 ;STOP T0 UNTIL WE HAVE READ AGAIN
+0086 020057           53             LJMP endofinterrupts    ;GO BACK TO READING AGAIN
+                      54     
+A51 MACRO ASSEMBLER  LAB3_Q2                                                              08/12/2014 20:43:34 PAGE     2
+
+2000                  55             org 2000h
+2000                  56     read:
+2000 C0E0             57             PUSH ACC                        ;PUSH A ONTO THE STACK
+2002                  58     readloop:
+2002 ED               59             MOV A,R5                        ;COUNTER ON DATA2 MOVED TO A
+2003 906000           60             MOV DPTR, #DATA2        ;DATA POINTER MOVED TO READ FROM DATA2
+2006 93               61             MOVC A, @A+DPTR
+2007 F5F0             62             MOV B,A
+                      63     
+                      64     ;SEPARATING THE FIRST FOUR BITS FROM THE LAST FOUR BITS
+2009 53F00F           65             ANL B,#00fh                     ;TO BE USED AS INDEX            
+200C 54F0             66             ANL A,#0f0h                     ;TO BE USED FOR DURATION OF SQUARE WAVE
+200E C4               67             SWAP A
+200F FE               68             MOV R6,A                        ;FROM HERE ONWARDS R6 WILL STORE OUR DURATION
+                      69     
+                      70     
+2010 0D               71             INC R5                          ;COUNTER INCREASED TO BE USED IN NEXT READ CYCLE
+                      72     
+                      73     ;NEXT PART OF CODE DOUBLES THE INDEX READ FROM THE SWITCH
+2011 E5F0             74             MOV A,B
+2013 75F002           75             MOV B,#002H
+                      76     ;MOV A,R0
+2016 A4               77             MUL AB
+2017 FF               78             MOV R7,A                        ;FROM HERE ONWARDS R7 STORES OUR INDEX 
+2018 D0E0             79             POP ACC                         ;POP A BACK FROM THE STACK AFTER SUBROUTINE IS COMP
+                             LETED
+201A 22               80             RET
+                      81     
+201B                  82     twoscomp:                       ;take bit-by-bitcomplement and add 1
+201B C0E0             83             PUSH ACC
+201D EC               84             MOV A,R4                        ;LSB
+201E F4               85             CPL A
+201F C3               86             CLR C
+2020 2401             87             ADD A,#1
+2022 FC               88             MOV R4,A
+2023 EB               89             MOV A,R3                        ;MSB
+2024 F4               90             CPL A 
+                      91     
+2025 4004             92             JC carry                        ;if carry from LSB, jump to carry
+2027 FB               93             MOV R3,A                        ;otherwise, take complement directly
+2028 D0E0             94             pop ACC
+202A 22               95             RET
+                      96     
+202B                  97     carry:
+202B 2401             98             ADD A,#1                        ;adding carry 1 to complement
+202D FB               99             MOV R3,A
+202E D0E0            100             POP ACC
+2030 22              101             RET
+                     102     
+2031                 103     hundredms:
+2031 C001            104             PUSH AR1
+2033 D28C            105             SETB TR0                                                ;START TIMER0. SO THE SQUAR
+                             E WAVE GENERATION STARTS
+                     106     ;MOVING FF TO TH1 AND TL1
+2035 8B8D            107             MOV TH1, R3     
+2037 8C8B            108             MOV TL1, R4
+                     109     
+2039 D28E            110             SETB TR1                                                ;START TIMER1. STOPS ONLY W
+                             HEN 100ms ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+203B 7A18            111             MOV R2, #018h                                   ;NO. OF TIMES WE HAVE TO RUN T1 FRO
+                             M 00 TO FE FOR 100ms
+203D                 112     set_t1_again:
+203D DA02            113             DJNZ R2, t1loop                                 ;CHECKING IF 100ms ARE DONE
+203F 800B            114             sjmp hundms_done
+2041                 115     t1loop:
+                     116     ;RESET TH1 AND TL1 if 100ms NOT UP
+A51 MACRO ASSEMBLER  LAB3_Q2                                                              08/12/2014 20:43:34 PAGE     3
+
+2041 8B8D            117             MOV TH1, R3
+2043 8C8B            118             MOV TL1, R4
+                     119     ;CHECK TH1 AND STOP IT FROM OVERFLOWING BECAUSE 100ms ARE NOT UP
+2045                 120     check_th1:
+2045 A98D            121             MOV R1, TH1
+2047 B9FEFB          122             CJNE R1, #0feh, check_th1
+204A 80F1            123             SJMP set_t1_again
+                     124     ;NOW 100ms ALMOST DONE. WAIT FOR INTERRUPT1 TO BE CALLED. THAT IS, TR1 TO BECOME 0.
+204C                 125     hundms_done:
+204C C3              126             CLR C
+204D A28E            127             MOV C, TR1
+204F 5002            128             JNC exit;condition check for whether we have to move on to the next address by read
+                             ing from the new array
+2051 80F9            129             SJMP  hundms_done;if not then keep doing nothing and let the two interrupts do thei
+                             r job
+2053                 130     exit:
+2053 D001            131             POP AR1
+2055 22              132             RET
+                     133     
+                     134     ;INTERRUPT ROUTINE FOR TIMER0
+000B                 135             org 000Bh
+000B                 136     ISR0:
+000B C28C            137             CLR             TR0                             ;STOP T0 FROM OVERFLOWING AGAIN BEF
+                             ORE P0.7 IS INVERTED                 
+000D 85718C          138             MOV             TH0,71H                 ;RESET TH0 AND TL0 FROM VALUE OF FREQ STORE
+                             D AT TEMPORARY MEMORY LOCATION       
+0010 85728A          139             MOV             TL0,72H
+0013 B287            140             CPL             P0.7
+0015 D28C            141             SETB    TR0                             ;START T0 AGAIN
+0017 32              142             RETI
+                     143     
+                     144     ;INTERRUPT ROUTINE FOR TIMER1
+001B                 145             org 001Bh
+001B                 146     ISR1:
+001B C28E            147             CLR TR1
+001D 32              148             RETI
+                     149     
+                     150     
+                     151     ;DATA STORED IN EXTERNAL MEMORY LOCATIONS
+5000                 152             org 5000h
+5000                 153     DATA1:
+5000 1A112410        154             DB 1AH, 11H, 24H, 10H, 3CH, 0FH, 61H, 0EH, 93H, 0DH, 0CFH, 0CH, 17H, 0CH, 6AH, 0BH,
+                              0C6H, 0AH, 2BH, 0AH, 99H, 09H, 0FH, 09H, 8DH, 08H, 12H, 08H, 9EH, 07H, 31H, 07H
+5004 3C0F610E                
+5008 930DCF0C                
+500C 170C6A0B                
+5010 C60A2B0A                
+5014 99090F09                
+5018 8D081208                
+501C 9E073107                
+                     155     
+6000                 156             org 6000h
+6000                 157     DATA2:
+6000 F2F4F6F7        158             DB 0F2H, 0F4H, 0F6H, 0F7H, 0F9H, 0FBH, 0FDH, 0FEH, 0FEH, 0FEH, 0FDH, 0FBH, 0F9H, 0F
+                             7H, 0F6H, 0F4H, 0F2H, 0F2H, 02H
+6004 F9FBFDFE                
+6008 FEFEFDFB                
+600C F9F7F6F4                
+6010 F2F202                  
+                     159     
+                     160             END
+A51 MACRO ASSEMBLER  LAB3_Q2                                                              08/12/2014 20:43:34 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+AR1. . . . . . . .  D ADDR   0001H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CARRY. . . . . . .  C ADDR   202BH   A   
+CHECK_TH1. . . . .  C ADDR   2045H   A   
+DATA1. . . . . . .  C ADDR   5000H   A   
+DATA2. . . . . . .  C ADDR   6000H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ENDOFINTERRUPTS. .  C ADDR   0057H   A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+ET1. . . . . . . .  B ADDR   00A8H.3 A   
+EXIT . . . . . . .  C ADDR   2053H   A   
+HUNDMS_DONE. . . .  C ADDR   204CH   A   
+HUNDREDMS. . . . .  C ADDR   2031H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+ISR1 . . . . . . .  C ADDR   001BH   A   
+LOOP . . . . . . .  C ADDR   005DH   A   
+MAIN . . . . . . .  C ADDR   0050H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+READ . . . . . . .  C ADDR   2000H   A   
+READLOOP . . . . .  C ADDR   2002H   A   
+SET_T1_AGAIN . . .  C ADDR   203DH   A   
+SQ_WAVE. . . . . .  C ADDR   007FH   A   
+T1LOOP . . . . . .  C ADDR   2041H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+TWOSCOMP . . . . .  C ADDR   201BH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

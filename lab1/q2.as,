@@ -1,0 +1,129 @@
+org 0000h
+
+mov sp, #020h
+mov r0, #00ah
+
+fivesec:
+mov a,p1
+
+
+mov r1,#064h
+again:
+lcall delay
+djnz r0,again
+
+swap a
+mov p1,a
+push p1
+
+mov r1,#064h
+comeagain:
+lcall delay
+djnz r1,comeagain
+
+djnz r0, fivesec
+
+
+mov r0,#0c8h
+
+back101:
+
+lcall delay
+
+djnz r0,back101
+
+;;;;;;;;;;;;;;;;
+
+; checking no. greater than 9
+
+mov c, p1.3 
+
+mov 2dh.3,c
+
+mov c, p1.2
+
+mov 2dh.2,c
+
+mov c, p1.1 
+
+mov 2dh.1,c
+
+mov c, p1.0
+
+mov 2dh.0,c
+
+clr c
+
+mov a,#9h ;10 times 
+
+subb a,2dh
+
+jc turnoff ;turn off led when no greater than 9
+
+add a,#1
+
+mov r2,a
+
+repeat:
+
+pop 2eh
+
+djnz r2, repeat
+
+result: ;gives the lower 4 bits of the elements 
+
+stored in array
+
+mov c, 2eh.3 ;’as there’re only 4 leds so 4-bit no. can be displayed
+
+mov p1.4,c
+
+mov c, 2eh.2
+
+mov p1.5,c
+
+mov c, 2eh.1
+
+mov p1.6,c
+
+mov c, 2eh.0
+
+mov p1.7,c
+
+sjmp result
+
+turnoff:
+
+clr c
+
+mov p1.4,c
+
+mov p1.5,c
+
+mov p1.6,c
+
+mov p1.7,c
+
+sjmp turnoff
+
+;delay subroutine
+
+org 3000h
+
+delay:
+
+mov r3, #0ffh
+
+mov r4, #0ffh
+
+back2:
+
+back1:
+
+djnz r3, back1
+
+djnz r4,back2 
+
+ret
+
+end

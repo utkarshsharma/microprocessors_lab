@@ -1,0 +1,40 @@
+A51 MACRO ASSEMBLER  Q1P1                                                                 08/01/2014 11:37:29 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN q1p1.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE q1p1.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 7881              1     MOV r0,#81h
+0002 7982              2     MOV r1,#82h
+0004 7601              3     MOV @r0,#001h
+0006 7702              4     MOV @r1,#002h
+                       5     
+0008 E6                6     mov A,@r0
+0009 FA                7     mov r2,A
+                       8     
+000A E7                9     mov A, @r1
+000B FB               10     mov r3, A
+                      11     
+000C 0A               12     INC r2
+000D DBFE             13     c1: DJNZ r3,c1
+000F 7BFF             14     MOV r3,#0FFh
+0011 DAFA             15     DJNZ r2,c1
+                      16     end
+A51 MACRO ASSEMBLER  Q1P1                                                                 08/01/2014 11:37:29 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+C1 . . . . . . . .  C ADDR   000DH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

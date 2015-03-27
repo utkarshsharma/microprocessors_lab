@@ -1,0 +1,268 @@
+C51 COMPILER V9.52.0.0   HW5                                                               08/25/2014 15:26:25 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HW5
+OBJECT MODULE PLACED IN .\hw5.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\hw5\hw5.c BROWSE DEBUG OBJECTEXTEND PRINT(.\hw5.lst) TABS(2) OBJECT(.\hw
+                    -5.obj)
+
+line level    source
+
+   1          #include <AT89C5131.h>
+   2          //*******DECLARING VARIABLES**********************************
+   3          
+   4            sbit RS = P0^0;
+   5            sbit RW = P0^1;
+   6            sbit EN = P0^2;
+   7            unsigned char displaychar;
+   8            unsigned int displaychar1;
+   9            
+  10            unsigned char note_index;
+  11            unsigned char duration_value;
+  12            unsigned char note_value;
+  13            unsigned int half_value;
+  14            unsigned char half_index;
+  15            unsigned char octave;
+  16            unsigned int octave1;
+  17            
+  18            unsigned int Halfperiod [12]= { 3900, 3681, 3476, 3279, 3096, 2925, 2757, 2600, 2456, 2319, 2189, 2066 };
+  19            unsigned char Notes [18]= {0, 2, 4, 5, 7, 9, 11, 16, 64, 16, 11, 9, 7, 5, 4, 2, 0, 0 };
+  20            unsigned char Durations[18]= {200, 100, 100, 100, 200, 100, 100, 200, 100, 200, 100, 100, 200, 100, 100, 
+             -100, 200, 00};
+  21            
+  22              
+  23          //*******DECLARING FUNCTIONS**********************************      
+  24            void LCD_READY();
+  25            void msdelay(unsigned int time);
+  26            void tenmsdelay(unsigned int time);
+  27            void lcdInit();
+  28            void CMD_WRITE(unsigned char command);
+  29            unsigned char ascii(unsigned char character);
+  30            void byte_to_hex_display(unsigned char a);
+  31            void DATA_WRITE(unsigned char character);
+  32            void Displayloop(unsigned char, unsigned char, unsigned char, unsigned int);    
+  33              
+  34          //*******MAIN LOOP**********************************
+  35          void main()
+  36          {
+  37   1        for( note_index=0; note_index < 18; note_index++)
+  38   1        {
+  39   2          duration_value = Durations[note_index];
+  40   2          if (duration_value == 0){break;}
+  41   2          note_value = Notes[note_index];
+  42   2          octave1 = note_value & 0xF0;
+  43   2          octave1= octave1>>4 & 0x0F;
+  44   2          octave= octave1;
+  45   2          half_index = note_value & 0x0F;
+  46   2          
+  47   2          half_value = Halfperiod[half_index];
+  48   2          
+  49   2          if(octave == 0x01)
+  50   2          {
+  51   3            half_value = half_value/2 ;
+  52   3          }
+  53   2          if(octave == 0x02)
+C51 COMPILER V9.52.0.0   HW5                                                               08/25/2014 15:26:25 PAGE 2   
+
+  54   2          {
+  55   3            half_value = half_value*2 ;
+  56   3          }
+  57   2          if(octave > 0x02) 
+  58   2          {
+  59   3            half_value = 0xFFFF ;
+  60   3          }
+  61   2          
+  62   2        Displayloop ( note_index, duration_value, octave, half_value);
+  63   2        tenmsdelay(2);
+  64   2        }
+  65   1      
+  66   1        while(1);
+  67   1      
+  68   1      }
+  69          
+  70          //*******DEFINING FUNCTIONS**********************************
+  71          
+  72          //*******LCD INITIALIZATION**********************************
+  73          
+  74          void lcd_init()
+  75            {
+  76   1          unsigned char a;
+  77   1          a = 0x38;
+  78   1          CMD_WRITE(a);    //2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+  79   1          
+  80   1          a = 0x0E;
+  81   1          CMD_WRITE(a);   //TURN ON DISPLAY, CURSOR NOT BLINKING
+  82   1        
+  83   1          a = 0x06;       //INCREMENTING THE CURSOR POSITION
+  84   1          CMD_WRITE(a); 
+  85   1      
+  86   1          
+  87   1          a = 0x01;       //CLEAR SCREEN
+  88   1          CMD_WRITE(a);
+  89   1        }
+  90          
+  91          
+  92          //*******ONE MILLISECOND DELAY**********************************
+  93          void msdelay(unsigned int time)
+  94          {
+  95   1        unsigned int i,j;
+  96   1        for(i=0;i<time;i++)
+  97   1        for(j=0;j<1275;j++);
+  98   1      }
+  99          
+ 100          //*******TEN MILLISECOND DELAY**********************************
+ 101          void tenmsdelay(unsigned int time){
+ 102   1        unsigned int i;
+ 103   1        for(i=0;i<time;i++)
+ 104   1        {
+ 105   2          msdelay(10);
+ 106   2        }
+ 107   1      }
+ 108          
+ 109          //*******WRITING A COMMAND TO THE LCD**********************************
+ 110          void CMD_WRITE(unsigned char command)
+ 111          { 
+ 112   1        LCD_READY();
+ 113   1        tenmsdelay(10);
+ 114   1        P2 = command;
+ 115   1        RS = 0;
+C51 COMPILER V9.52.0.0   HW5                                                               08/25/2014 15:26:25 PAGE 3   
+
+ 116   1        RW = 0;
+ 117   1        EN = 1;
+ 118   1        msdelay(1);
+ 119   1        EN = 0; 
+ 120   1        msdelay(1);
+ 121   1      }
+ 122          
+ 123          //*******WRITING DATA TO THE LCD**********************************
+ 124          void DATA_WRITE(unsigned char character)
+ 125          {
+ 126   1        LCD_READY();
+ 127   1        tenmsdelay(1);
+ 128   1        P2 = character;
+ 129   1        RS = 1;
+ 130   1        RW = 0;
+ 131   1        EN = 1;
+ 132   1        msdelay(1);
+ 133   1        EN = 0;
+ 134   1        msdelay(1);
+ 135   1      }
+ 136          
+ 137          //*******CONVERT LOWER FOUR BITS TO ASCII**********************************
+ 138          unsigned char ascii(unsigned char character)
+ 139          {
+ 140   1        if (character>9) return (character - 9 + 0x40); 
+ 141   1        else return (character + 0x30);               
+ 142   1      }
+ 143          
+ 144          //*******CONVERT ONE BYTE TO ASCII AND DISPLAY ON LCD**********************************
+ 145          void byte_to_hex_display(unsigned char a)
+ 146          { 
+ 147   1        unsigned char c= a>>4 & 0x0F;     //Higher nibble
+ 148   1        unsigned char b= ascii (c);
+ 149   1        DATA_WRITE(b);
+ 150   1      
+ 151   1        c= a & 0x0F;                      //Lower nibble
+ 152   1        b= ascii (c);
+ 153   1        DATA_WRITE(b);
+ 154   1      }
+ 155          
+ 156          //*******WHATEVER IS TO BE DISPLAYED ON THE LCD**********************************
+ 157          void Displayloop (unsigned char noteindex, unsigned char duration, unsigned char octave, unsigned int half
+             -period)
+ 158          {
+ 159   1      
+ 160   1        lcd_init();
+ 161   1        displaychar = 'N';
+ 162   1        DATA_WRITE(displaychar);
+ 163   1        displaychar = 'o';
+ 164   1        DATA_WRITE(displaychar);
+ 165   1        displaychar = 't';
+ 166   1        DATA_WRITE(displaychar);
+ 167   1        displaychar = 'e';
+ 168   1        DATA_WRITE(displaychar);    
+ 169   1        displaychar = '=';
+ 170   1        DATA_WRITE(displaychar);
+ 171   1        displaychar = ' ';
+ 172   1        DATA_WRITE(displaychar);
+ 173   1        
+ 174   1        byte_to_hex_display(noteindex);
+ 175   1      
+ 176   1        displaychar = ' ';
+C51 COMPILER V9.52.0.0   HW5                                                               08/25/2014 15:26:25 PAGE 4   
+
+ 177   1        DATA_WRITE(displaychar);
+ 178   1        displaychar = 'D';
+ 179   1        DATA_WRITE(displaychar);
+ 180   1        displaychar = '=';
+ 181   1        DATA_WRITE(displaychar);
+ 182   1        
+ 183   1        byte_to_hex_display(duration);
+ 184   1        
+ 185   1        displaychar = 0XC0;         // NEXT LINE
+ 186   1        CMD_WRITE(displaychar);
+ 187   1      
+ 188   1        displaychar = 'O';
+ 189   1        DATA_WRITE(displaychar);
+ 190   1        displaychar = 'c';
+ 191   1        DATA_WRITE(displaychar);
+ 192   1        displaychar = 't';
+ 193   1        DATA_WRITE(displaychar);
+ 194   1        displaychar = '=';
+ 195   1        DATA_WRITE(displaychar);
+ 196   1        
+ 197   1        byte_to_hex_display(octave);
+ 198   1        
+ 199   1        displaychar = ' ';
+ 200   1        DATA_WRITE(displaychar);
+ 201   1        displaychar = 'H';
+ 202   1        DATA_WRITE(displaychar);
+ 203   1        displaychar = 'P';
+ 204   1        DATA_WRITE(displaychar);
+ 205   1        displaychar = '=';
+ 206   1        DATA_WRITE(displaychar);
+ 207   1        displaychar = ' ';
+ 208   1        DATA_WRITE(displaychar);
+ 209   1        
+ 210   1        displaychar = halfperiod>>8 & 0x00FF;
+ 211   1        byte_to_hex_display(displaychar);
+ 212   1        
+ 213   1        displaychar = ' ';
+ 214   1        DATA_WRITE(displaychar);
+ 215   1        
+ 216   1        displaychar = halfperiod & 0x00FF;
+ 217   1        byte_to_hex_display(displaychar);
+ 218   1        
+ 219   1      }
+ 220          
+ 221          void LCD_READY()
+ 222            {
+ 223   1            int i,j;
+ 224   1            unsigned char a = 0xff;
+ 225   1            P2 = 0xFF;            
+ 226   1            RS = 0;               
+ 227   1            RW = 1;               
+ 228   1            for( i=0; i<=75 ; i++)
+ 229   1          {
+ 230   2            for (j=0; j<=10 ; j++);
+ 231   2            }
+ 232   1            
+ 233   1            EN = 0;
+ 234   1          }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    556    ----
+C51 COMPILER V9.52.0.0   HW5                                                               08/25/2014 15:26:25 PAGE 5   
+
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     72      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

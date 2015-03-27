@@ -1,0 +1,133 @@
+A51 MACRO ASSEMBLER  LAB3_Q1                                                              08/11/2014 16:03:30 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN lab3_q1.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE lab3_q1.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     USING 0
+0000                   2     ORG 00h
+0000 1A112410          3     DATA1: DB 1AH, 11H, 24H, 10H, 3CH, 0FH, 61H, 0EH, 93H, 0DH, 0CFH, 0CH, 17H, 0CH, 6AH, 0BH, 
+                             0C6H, 0AH, 2BH, 0AH, 99H, 09H, 0FH, 09H, 8DH, 08H, 12H, 08H, 9EH, 07H, 31H, 07H
+0004 3C0F610E                
+0008 930DCF0C                
+000C 170C6A0B                
+0010 C60A2B0A                
+0014 99090F09                
+0018 8D081208                
+001C 9E073107                
+                       4     
+0020 758901            5     MOV TMOD,#001h          ;16 bit counter mode
+0023 D297              6     SETB P1.7
+                       7     
+0200                   8     ORG 200H
+                       9     
+0200 12021B           10     LCALL read
+0203 900000           11     MOV DPTR, #DATA1
+                      12     
+0206                  13     loop:
+0206 EF               14     MOV A,R7
+0207 93               15     MOVC A, @A+DPTR
+0208 FC               16     MOV R4,A
+0209 EF               17     MOV A, R7
+020A 04               18     INC A
+020B 0F               19     INC R7
+020C 93               20     MOVC A, @A+DPTR
+020D FB               21     MOV R3,A
+020E 120239           22     LCALL twoscomp
+0211                  23     sq_wave:
+0211 12024D           24     LCALL delay
+0214 B297             25     CPL P1.7
+0216 80F9             26     SJMP sq_wave
+0218 1F               27     DEC R7
+0219 80EB             28     SJMP loop
+                      29     
+                      30     
+021B                  31     read:
+021B C000             32     PUSH AR0
+021D C0E0             33     PUSH ACC
+021F 75900F           34     MOV P1,#00FH            ;clearing first 4 bits in advance to make last 4 bits of memory loc
+                             ation 0
+0222 E590             35     MOV A,P1
+0224 F8               36     MOV R0,A
+0225 12024D           37     LCALL delay
+0228 E590             38     MOV A,P1
+022A 98               39     SUBB A,R0                       ; check if both values read are equal
+022B B400ED           40     CJNE A,#000H,read
+                      41     
+                      42     ;NEXT PART OF CODE DOUBLES THE INDEX READ FROM THE SWITCH
+022E 75F002           43     MOV B,#002H
+0231 E8               44     MOV A,R0
+0232 A4               45     MUL AB
+0233 FF               46     MOV R7,A
+0234 D0E0             47     POP ACC
+0236 D000             48     POP AR0
+0238 22               49     RET
+A51 MACRO ASSEMBLER  LAB3_Q1                                                              08/11/2014 16:03:30 PAGE     2
+
+                      50     
+0239                  51     twoscomp:                       ;take bit-by-bitcomplement and add 1
+0239 C0E0             52     PUSH ACC
+023B EC               53     MOV A,R4                        ;LSB
+023C F4               54     CPL A
+023D C3               55     CLR C
+023E 2401             56     ADD A,#1
+0240 FC               57     MOV R4,A
+0241 EB               58     MOV A,R3                        ;MSB
+0242 F4               59     CPL A 
+                      60     
+0243 4002             61     JC carry                        ;if carry from LSB, jump to carry
+0245 FB               62     MOV R3,A                        ;otherwise, take complement directly
+0246 22               63     RET
+                      64     
+0247                  65     carry:
+0247 2401             66     ADD A,#1                        ;adding carry 1 to complement
+0249 FB               67     MOV R3,A
+024A D0E0             68     POP ACC
+024C 22               69     RET
+                      70     
+                      71     
+024D                  72     delay:
+024D 8B8C             73     MOV TH0,R3
+024F 8C8A             74     MOV TL0,R4
+                      75     
+0251 D28C             76     SETB TR0
+0253 308DFD           77     loop1: JNB TF0,loop1
+0256 C28C             78     CLR TR0
+0258 C28D             79     CLR TF0
+025A 22               80     RET
+                      81     
+                      82     END
+A51 MACRO ASSEMBLER  LAB3_Q1                                                              08/11/2014 16:03:30 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+AR0. . . . . . . .  D ADDR   0000H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CARRY. . . . . . .  C ADDR   0247H   A   
+DATA1. . . . . . .  C ADDR   0000H   A   
+DELAY. . . . . . .  C ADDR   024DH   A   
+LOOP . . . . . . .  C ADDR   0206H   A   
+LOOP1. . . . . . .  C ADDR   0253H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+READ . . . . . . .  C ADDR   021BH   A   
+SQ_WAVE. . . . . .  C ADDR   0211H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWOSCOMP . . . . .  C ADDR   0239H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

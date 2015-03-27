@@ -1,0 +1,43 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+U:\Acads 5th Sem\EE 337 Lab\p51 programs\hw4\hw4.uvproj
+Project File Date:  08/18/2014
+
+<h2>Output:</h2>
+Build target 'Target 1'
+Target has no object modules
+Target not created
+Build target 'Target 1'
+assembling hw4_q1.asm...
+hw4_q1.asm(17): error A51: TARGET OUT OF RANGE
+Target not created
+Build target 'Target 1'
+assembling hw4_q1.asm...
+hw4_q1.asm(17): error A51: TARGET OUT OF RANGE
+Target not created
+Build target 'Target 1'
+assembling hw4_q1.asm...
+hw4_q1.asm(17): error A51: TARGET OUT OF RANGE
+Target not created
+Build target 'Target 1'
+assembling hw4_q1.asm...
+linking...
+Program Size: data=8.0 xdata=0 code=5422
+"hw4" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling hw4_q1.asm...
+hw4_q1.asm(17): error A51: TARGET OUT OF RANGE
+Target not created
+Build target 'Target 1'
+assembling hw4_q1.asm...
+linking...
+Program Size: data=8.0 xdata=0 code=5422
+"hw4" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling hw4_q1.asm...
+linking...
+Program Size: data=8.0 xdata=0 code=5422
+"hw4" - 0 Error(s), 0 Warning(s).

@@ -1,0 +1,90 @@
+A51 MACRO ASSEMBLER  Q2_HW3                                                               08/11/2014 15:01:31 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\q2_hw3.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw3\q2_hw3.asm SET(SMALL) DEBUG PRINT(.\q2_hw3.lst) OBJECT(.\q2_hw3.obj
+                      ) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 7881              1     MOV R0,#081h
+0002 7982              2     MOV R1,#082h
+                       3     
+0004 76FF              4     MOV @R0,#0ffh           ;MSB
+0006 77FF              5     MOV @R1,#0ffh           ;LSB
+                       6     
+0008 12002F            7     LCALL twoscomp
+                       8     
+000B 868C              9     MOV TH0,@R0
+000D 878A             10     MOV TL0,@R1
+                      11     
+000F 758901           12     MOV TMOD,#001h          ;16 bit counter mode
+                      13     
+0012 7590F0           14     MOV P1,#0f0h
+                      15     
+0015                  16     blinky:
+0015 E590             17     MOV A,P1
+0017 F4               18     CPL A
+0018 54F0             19     ANL A,#0f0h
+001A F590             20     MOV P1,A
+                      21     
+001C 7A01             22     MOV R2,#01h
+                      23     
+001E                  24     comeagain:
+001E 120025           25     LCALL delay
+0021 DAFB             26     DJNZ R2,comeagain
+                      27     
+0023 80F0             28     SJMP blinky
+                      29     
+0025                  30     delay:
+0025 D28C             31     SETB TR0
+0027 308DFD           32     loop: JNB TF0,loop
+002A C28C             33     CLR TR0
+002C C28D             34     CLR TF0
+002E 22               35     RET
+                      36     
+002F                  37     twoscomp:                       ;take bit-by-bitcomplement and add 1
+002F E7               38     MOV A,@R1                       ;LSB
+0030 F4               39     CPL A
+0031 C3               40     CLR C
+0032 2401             41     ADD A,#1
+0034 F7               42     MOV @R1,A
+0035 E6               43     MOV A,@R0                       ;MSB
+0036 F4               44     CPL A 
+                      45     
+0037 4002             46     JC carry                        ;if carry from LSB, jump to carry
+0039 F6               47     MOV @R0,A                       ;otherwise, take complement directly
+003A 22               48     RET
+                      49     
+003B                  50     carry:
+003B 2401             51     ADD A,#1                        ;adding carry 1 to complement
+003D F6               52     MOV @R0,A
+003E 22               53     RET
+                      54     END
+A51 MACRO ASSEMBLER  Q2_HW3                                                               08/11/2014 15:01:31 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+BLINKY . . . . . .  C ADDR   0015H   A   
+CARRY. . . . . . .  C ADDR   003BH   A   
+COMEAGAIN. . . . .  C ADDR   001EH   A   
+DELAY. . . . . . .  C ADDR   0025H   A   
+LOOP . . . . . . .  C ADDR   0027H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWOSCOMP . . . . .  C ADDR   002FH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

@@ -1,0 +1,42 @@
+A51 MACRO ASSEMBLER  HW7_1                                                                09/15/2014 14:15:43 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw7_1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw7\hw7_1.asm SET(SMALL) DEBUG PRINT(.\hw7_1.lst) OBJECT(.\hw7_1.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+  00C3                 2             SPCON EQU 0C3h
+  00C4                 3             SPIF EQU 0C4h
+  00C5                 4             DATAREG EQU 0C5h
+                       5     
+0000 2100              6             JMP MAIN
+                       7     
+0100                   8     ORG 100H
+0100                   9     MAIN:
+                      10     
+0100 75C35D           11             MOV SPCON, #01011101B;          BaudRate=3MHz
+                      12     
+0103 80FB             13             JMP MAIN
+                      14     
+                      15     END
+A51 MACRO ASSEMBLER  HW7_1                                                                09/15/2014 14:15:43 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+DATAREG. . . . . .  N NUMB   00C5H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+SPCON. . . . . . .  N NUMB   00C3H   A   
+SPIF . . . . . . .  N NUMB   00C4H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

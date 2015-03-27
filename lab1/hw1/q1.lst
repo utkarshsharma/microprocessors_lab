@@ -1,0 +1,73 @@
+A51 MACRO ASSEMBLER  Q1                                                                   08/11/2014 01:29:02 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\q1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw3\q1.asm SET(SMALL) DEBUG PRINT(.\q1.lst) OBJECT(.\q1.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 7881              1     MOV R0,#081h
+0002 7982              2     MOV R1,#082h
+                       3     
+0004 764E              4     MOV @R0,#04eh           ;MSB
+0006 77AC              5     MOV @R1,#0ach           ;LSB
+                       6     
+0008 12001F            7     LCALL twoscomp
+                       8     
+000B 868C              9     MOV TH0,@R0
+000D 878A             10     MOV TL0,@R1
+                      11     
+000F 758901           12     MOV TMOD,#001h          ;16 bit counter mode
+                      13     
+0012 120015           14     LCALL delay
+                      15     
+0015                  16     delay:
+0015 D28C             17     SETB TR0
+0017 308DFD           18     loop: JNB TF0,loop
+001A C28C             19     CLR TR0
+001C C28D             20     CLR TF0
+001E 22               21     RET
+                      22     
+                      23     
+001F                  24     twoscomp:                       ;take bit-by-bitcomplement and add 1
+001F E7               25     MOV A,@R1                       ;LSB
+0020 F4               26     CPL A
+0021 C3               27     CLR C
+0022 2401             28     ADD A,#1
+0024 F7               29     MOV @R1,A
+0025 E6               30     MOV A,@R0                       ;MSB
+0026 F4               31     CPL A 
+                      32     
+0027 4002             33     JC carry                        ;if carry from LSB, jump to carry
+0029 F6               34     MOV @R0,A                       ;otherwise, take complement directly
+002A 22               35     RET
+                      36     
+002B                  37     carry:
+002B 2401             38     ADD A,#1                        ;adding carry 1 to complement
+002D F6               39     MOV @R0,A
+002E 22               40     RET
+                      41     END
+A51 MACRO ASSEMBLER  Q1                                                                   08/11/2014 01:29:02 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CARRY. . . . . . .  C ADDR   002BH   A   
+DELAY. . . . . . .  C ADDR   0015H   A   
+LOOP . . . . . . .  C ADDR   0017H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWOSCOMP . . . . .  C ADDR   001FH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

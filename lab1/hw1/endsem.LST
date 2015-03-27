@@ -1,0 +1,247 @@
+A51 MACRO ASSEMBLER  ENDSEM                                                               11/06/2014 18:01:32 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN endsem.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE endsem.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0H
+0000 021000            2     LJMP MAIN
+                       3     
+00CC                   4     ORG 00CCH
+00CC 02101C            5             LJMP ISR0
+                       6             
+1000                   7     ORG 1000H 
+1000                   8     MAIN:
+1000 120070            9             LCALL INIT_LCD
+1003 758991           10             MOV TMOD,#10010001B ; Timer 0, Timer 1 in mode 1(16 bit counter)
+                      11             ;SETB EA                                ; Enable Interrupts
+                      12             ;SETB ET0                       ; Enable Timer 0 Interrupt
+1006 758D00           13             MOV TH1, #00H
+1009 758B00           14             MOV TL1, #00H
+                      15             ;MOV TH0, #0FFH
+                      16             ;MOV TL0, #0FFH
+                      17             ;MOV A, TCON
+                      18             ;ANL A, #00000010B
+                      19     ;JUMP1: CJNE A, #00H, JUMP1
+                      20             ;SETB TR0
+                      21             ;CLR IT0
+                      22             
+100C                  23     HERE:
+100C 2087FD           24             JB P0.7, $
+100F D28E             25             SETB TR1
+1011 3087FD           26             JNB P0.7, $
+1014 2087FD           27             JB P0.7, $
+1017 12101C           28             LCALL ISR0
+101A 80F0             29             SJMP HERE
+                      30             
+101C                  31     ISR0:
+                      32             ;CLR ET0
+101C C28E             33             CLR TR1
+101E AD8D             34             MOV R5, TH1
+1020 AE8B             35             MOV R6, TL1
+                      36             ;MOV TH0, #0FFH
+                      37             ;MOV TL0, #0FFH
+1022 758D00           38             MOV TH1, #00H
+1025 758B00           39             MOV TL1, #00H
+1028 7480             40             MOV A, #80H         ;START FROM HERE
+102A 120050           41             LCALL CMD_WRITE
+102D ED               42             MOV A, R5
+102E 1200A8           43             LCALL WRITE_BYTE
+1031 120096           44             LCALL DELAY
+1034 EE               45             MOV A, R6
+1035 1200A8           46             LCALL WRITE_BYTE
+1038 120096           47             LCALL DELAY
+                      48             ;LCALL DISPLAY
+                      49             ;LCALL BCDDISPLAY
+                      50             ;SETB ET0
+                      51             ;MOV A, TCON
+                      52             ;ANL A, #00000010B
+                      53     ;JUMP: CJNE A, #00H, JUMP
+                      54             
+103B 22               55     RET
+                      56     
+                      57     
+                      58     ;DISPLAY:
+A51 MACRO ASSEMBLER  ENDSEM                                                               11/06/2014 18:01:32 PAGE     2
+
+                      59             ;MOV A, #1H          ;CLEAR DISPLAY
+                      60             ;LCALL CMD_WRITE
+                      61             ;MOV A, #83H         ;START FROM HERE
+                      62             ;LCALL CMD_WRITE
+                      63             ;MOV A, R5      
+                      64             ;LCALL DATA_WRITE
+                      65             ;MOV A,B
+                      66             ;LCALL DATA_WRITE
+                      67     ;RET
+                      68     
+                      69     ;BCDDISPLAY:
+                      70     ;NOP
+                      71     ;RET
+                      72     
+                      73     
+                      74     
+  0080                75     RS EQU P0.0
+  0081                76     RW EQU P0.1
+  0082                77     EN EQU P0.2
+                      78     
+0050                  79     ORG 50H
+                      80     
+0050                  81     CMD_WRITE:  
+0050 1185             82             ACALL LCD_READY
+0052 F5A0             83             MOV P2, A
+0054 C280             84             CLR RS
+0056 C281             85             CLR RW
+0058 D282             86             SETB EN
+005A 120096           87             LCALL DELAY 
+005D C282             88             CLR EN
+005F 22               89             RET
+                      90     
+0060                  91     DATA_WRITE: 
+0060 1185             92             ACALL LCD_READY
+0062 F5A0             93             MOV P2, A
+0064 D280             94             SETB RS
+0066 C281             95             CLR RW
+0068 D282             96             SETB EN
+006A 120096           97             LCALL DELAY  ;WILL JUST HELP US SEE CHARACTERS BEING DISPLAYED ONE BY ONE. 
+                      98                                      ;ALSO, IT MAY ELIMINATE THE NEED FOR LCD_READY/BUSY CHECK!
+                      99                                      ;BUT IT IS RECOMMENDED TO ALWAYS CHECK FOR LCD_BUSY.
+                     100                                  ;UNCOMMENT THE CALL TO DELAY IF U WANT TO SEE INDIVIDUAL CHAR
+                     101                                  ;BEING WRITTEN SLOWLY
+006D C282            102             CLR EN
+006F 22              103             RET
+                     104     
+0070                 105     INIT_LCD:
+0070 7438            106             MOV A, #38H     ;2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+0072 120050          107             LCALL CMD_WRITE
+0075 740E            108             MOV A, #0EH     ;TURN ON DISPLAY, CURSOR NOT BLINKING
+0077 120050          109             LCALL CMD_WRITE
+007A 7406            110             MOV A, #06H     ;INCREMENTING THE CURSOR POSITION
+007C 120050          111             LCALL CMD_WRITE
+007F 7401            112             MOV A, #1H      ;CLEAR SCREEN
+0081 120050          113             LCALL CMD_WRITE
+0084 22              114             RET
+                     115     
+                     116     ;FOLLOWING SUB-ROUTINE CHECKS BUSY_FLAG AND WAITS TILL LCD IS READY
+                     117     
+0085                 118     LCD_READY:
+0085 75A0FF          119             MOV P2,#0FFH    ;MAKE P2.7 AS INPUT
+0088 C280            120             CLR RS          ;SELECT COMMAND REGISTER
+008A D281            121             SETB RW         ;TO READ FROM LCD
+008C                 122     CHECK:  
+008C C282            123             CLR EN
+008E D282            124             SETB EN
+A51 MACRO ASSEMBLER  ENDSEM                                                               11/06/2014 18:01:32 PAGE     3
+
+0090 20A7F9          125             JB P2.7, CHECK  ;READ BUSY FLAG UNTIL IT BECOMES ZERO
+0093 C282            126             CLR EN
+0095 22              127             RET
+                     128             
+0096                 129     DELAY: 
+                     130     
+0096 79FF            131             MOV R1, #0FFH
+0098 7AFF            132             MOV R2, #0FFH
+009A                 133     L1: 
+009A 00              134             NOP 
+009B D9FD            135             DJNZ R1, L1
+009D DAFB            136             DJNZ R2, L1
+                     137     
+009F 22              138     RET     
+                     139     
+                     140     
+00A0                 141     DELAY5: 
+                     142     
+00A0 7D32            143             MOV R5, #32H
+00A2                 144     ABC: 
+00A2 120096          145             LCALL DELAY
+00A5 DDFB            146             DJNZ R5, ABC
+                     147     
+00A7 22              148             RET
+                     149     
+00A8                 150     WRITE_BYTE:
+00A8 1200B4          151     LCALL BYTE_ASCII
+00AB 120060          152     LCALL DATA_WRITE
+00AE E5F0            153     MOV A,B
+00B0 120060          154     LCALL DATA_WRITE
+00B3 22              155     RET
+                     156     
+                     157     ;ASCII_BCD:
+                     158     ;MOV DPTR, #BCD,TABLE
+                     159     ;MOVC A,@A-DPTR
+                     160     
+00B4                 161     BYTE_ASCII:
+00B4 FF              162             MOV R7, A
+00B5 540F            163             ANL A, #0FH
+00B7 11C2            164             ACALL NIBBLE_ASCII
+00B9 F5F0            165             MOV B, A
+                     166     
+00BB EF              167             MOV A, R7
+00BC C4              168             SWAP A
+00BD 540F            169             ANL A, #0FH
+00BF 11C2            170             ACALL NIBBLE_ASCII
+00C1 22              171             RET
+                     172     ;----------------------------------------------------------------------------
+00C2                 173     NIBBLE_ASCII:   
+00C2 900400          174             MOV DPTR, #HEX_TABLE
+00C5 93              175             MOVC A,@A+DPTR
+00C6 22              176             RET
+                     177     ;----------------------------------------------------------------------------
+0400                 178     ORG 400H
+0400 30313233        179     HEX_TABLE: DB 30H,31H,32H,33H,34H,35H,36H,37H,38H,39H,41H,42H,43H,44H,45H,46H
+0404 34353637                
+0408 38394142                
+040C 43444546                
+                     180     ;----------------------------------------------------------------------------
+                     181     
+                     182     
+                     183     
+                     184     END     
+                                     
+                                     
+                                     
+A51 MACRO ASSEMBLER  ENDSEM                                                               11/06/2014 18:01:32 PAGE     4
+
+                             
+                                     
+A51 MACRO ASSEMBLER  ENDSEM                                                               11/06/2014 18:01:32 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ABC. . . . . . . .  C ADDR   00A2H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+BYTE_ASCII . . . .  C ADDR   00B4H   A   
+CHECK. . . . . . .  C ADDR   008CH   A   
+CMD_WRITE. . . . .  C ADDR   0050H   A   
+DATA_WRITE . . . .  C ADDR   0060H   A   
+DELAY. . . . . . .  C ADDR   0096H   A   
+DELAY5 . . . . . .  C ADDR   00A0H   A   
+EN . . . . . . . .  B ADDR   0080H.2 A   
+HERE . . . . . . .  C ADDR   100CH   A   
+HEX_TABLE. . . . .  C ADDR   0400H   A   
+INIT_LCD . . . . .  C ADDR   0070H   A   
+ISR0 . . . . . . .  C ADDR   101CH   A   
+L1 . . . . . . . .  C ADDR   009AH   A   
+LCD_READY. . . . .  C ADDR   0085H   A   
+MAIN . . . . . . .  C ADDR   1000H   A   
+NIBBLE_ASCII . . .  C ADDR   00C2H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+RS . . . . . . . .  B ADDR   0080H.0 A   
+RW . . . . . . . .  B ADDR   0080H.1 A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+WRITE_BYTE . . . .  C ADDR   00A8H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

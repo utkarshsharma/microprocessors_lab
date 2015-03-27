@@ -1,0 +1,225 @@
+A51 MACRO ASSEMBLER  LAB4_Q1                                                              08/22/2014 16:58:20 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab4_q1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab4\lab4_q1.asm SET(SMALL) DEBUG PRINT(.\lab4_q1.lst) OBJECT(.\lab4_q1
+                      .obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+                       2     USING 0
+0000 020100            3     LJMP    setup
+                       4     
+1200                   5     ORG 1200H
+1200 01020408          6     speeds: DB 01H, 02H, 04H, 08H
+1204 08040201          7     speedsback: DB 08H, 04H, 02H, 01H
+                       8     
+0100                   9     ORG 100H
+0100                  10     setup:
+0100 758901           11             MOV TMOD, #001h
+0103 D2A9             12             SETB ET0                        ;ENABLE INTERRUPTS FOR T1 AND T0
+0105 D2AF             13             SETB EA
+                      14             
+0107                  15     MAIN:   
+0107 7F00             16             MOV R7, #00H            ;R7 STORES SPEED                
+0109 7A00             17             MOV R2, #00H            ;INITIALISING
+010B 75900F           18             MOV P1, #0Fh            ;Initializing (For Reading)
+010E E590             19             MOV A, P1
+0110 5403             20             ANL A, #03H
+0112 8AF0             21             MOV B, R2                       ;OLD VALUE IN R2 MOVED TO B
+0114 FA               22             MOV R2, A                       ;R2 STORES OLD SWITCH INPUT
+0115 95F0             23             SUBB A, B
+0117 2402             24             ADD A, #02D
+                      25             
+0119 30E003           26             JNB ACC.0, not1or3      ;Defined states. (If the difference between new and old val
+                             ues of switches + 2)=1 or 3, decrease speed
+011C 020128           27             LJMP dec_check                          
+011F                  28     not1or3:
+011F 30E103           29             JNB ACC.1, not2         ;Defined states. (If the difference between new and old val
+                             ues of switches + 2)=2, no change in speed
+0122 02013C           30             LJMP run
+0125                  31     not2:                                   ;Defined states. (If the difference between new and
+                              old values of switches + 2)=0 or 4, increase speed
+0125 020132           32             LJMP inc_check
+                      33     
+                      34     
+0128                  35     dec_check:
+0128 BFF903           36             CJNE R7, #-7D, decrease         ;if already max backwd speed
+012B 02013C           37             LJMP run
+012E                  38     decrease:       
+012E 1F               39             DEC R7                                          ;speed decreased/increased in backw
+                             d direction 
+012F 02013C           40             LJMP run
+                      41     
+0132                  42     inc_check:      
+0132 BF0703           43             CJNE R7, #7D, increase          ;if already max fwd speed
+0135 02013C           44             LJMP run
+0138                  45     increase:
+0138 0F               46             INC R7                                          ;speed increased/decreased in backw
+                             d directio 
+0139 02013C           47             LJMP run
+                      48                     
+013C                  49     run:
+013C BF0003           50             CJNE R7, #0D, nonzero           ;if speed becomes zero
+013F 020172           51             LJMP zerospeed
+0142                  52     nonzero:
+A51 MACRO ASSEMBLER  LAB4_Q1                                                              08/22/2014 16:58:20 PAGE     2
+
+0142 EF               53             MOV A,  R7                                      ;checking if speed is positive or n
+                             egative,
+0143 20E716           54             JB ACC.7, anticlock                     ;if speed(i.e. value stored in R7) is negat
+                             ive, then MSB will be high, and we will run the motor anticlockwise
+                      55     
+0146                  56     clockws:
+0146 7400             57             MOV A,#00H
+0148 7B00             58             MOV R3, #00H
+014A                  59     clockws1:
+014A EB               60             MOV A, R3
+014B 901200           61             MOV DPTR, #speeds
+014E 93               62             MOVC A,@A+DPTR
+014F C4               63             SWAP A
+0150 F590             64             MOV     P1, A
+0152 120185           65             LCALL runfwd
+0155 0B               66             INC R3
+0156 BB04F1           67             CJNE R3, #04H, clockws1         ;speed cycle complete
+0159 020107           68             LJMP MAIN
+                      69     
+015C                  70     anticlock:
+015C 7400             71             MOV A,#00H
+015E 7B00             72             MOV R3, #00H
+0160                  73     anticlock1:
+0160 EB               74             MOV A, R3
+0161 901204           75             MOV DPTR, #speedsback
+0164 93               76             MOVC A,@A+DPTR
+0165 C4               77             SWAP A
+0166 F590             78             MOV     P1, A
+0168 12017B           79             LCALL runbckwd
+016B 0B               80             INC R3
+016C BB04F1           81             CJNE R3, #04H, anticlock1       ;speed cycle complete
+016F 020107           82             LJMP MAIN
+                      83     
+0172                  84     zerospeed:      
+0172 759000           85             MOV P1,#00h                                     ;motor speed zero
+0175 120107           86             LCALL MAIN
+0178 020172           87             LJMP zerospeed
+                      88     
+017B                  89     runbckwd:       
+017B EF               90             MOV A, R7
+017C 2408             91             ADD A, #08D                                     ;adjust for setting appropriate del
+                             ay. Example -2=-FE. -FE+8=-2+8=6. i.e. 6*150ms of delay and anticlckws direction
+017E FD               92             MOV R5, A                                       ;no. of times 150ms delay has to be
+                              run
+017F 121500           93             keeprun:        LCALL hundfiftyms
+0182 DDFB             94             DJNZ R5, keeprun
+0184 22               95             RET
+                      96     
+0185                  97     runfwd:
+0185 EF               98             MOV A, R7                       
+0186 FD               99             MOV R5, A
+0187 7408            100             MOV A, #08D
+0189 9D              101             SUBB A, R5                                      ;adjust for setting appropriate del
+                             ay. Example R7=3. 8-3= 5. i.e. 5*150ms of delay and clckws direction
+018A FD              102             MOV R5, A                                       ;no. of times 150ms delay has to be
+                              run
+018B 121500          103             keeprun2:       LCALL hundfiftyms       
+018E DDFB            104             DJNZ R5, keeprun2
+0190 22              105             RET
+                     106             
+1500                 107     ORG 1500H
+1500                 108     hundfiftyms:
+1500 C001            109             PUSH AR1
+1502 C002            110             PUSH AR2
+                     111     ;MOVING 00 TO TH0 AND TL0
+1504 758C00          112             MOV TH0, #00h   
+A51 MACRO ASSEMBLER  LAB4_Q1                                                              08/22/2014 16:58:20 PAGE     3
+
+1507 758A00          113             MOV TL0, #00h
+                     114     
+150A D28C            115             SETB TR0                                        ;START TIMER1. STOPS ONLY WHEN 100m
+                             s ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+150C 7A06            116             MOV R2, #06h                                    ;NO. OF TIMES WE HAVE TO RUN T0 FRO
+                             M 00 TO FE FOR 100ms
+150E                 117     set_t1_again:
+150E DA02            118             DJNZ R2, t1loop                                 ;CHECKING IF 100ms ARE DONE
+1510 800D            119             sjmp hundfifms_done
+1512                 120     t1loop:
+                     121     ;RESET TH0 AND TL0 if 100ms NOT UP
+1512 758C00          122             MOV TH0, #00h
+1515 758A00          123             MOV TL0, #00h
+                     124     ;CHECK TH0 AND STOP IT FROM OVERFLOWING BECAUSE 100ms ARE NOT UP
+1518                 125     check_th1:
+1518 A98C            126             MOV R1, TH0
+151A B9FEFB          127             CJNE R1, #0feh, check_th1
+151D 80EF            128             SJMP set_t1_again
+                     129     ;NOW 100ms ALMOST DONE. WAIT FOR INTERRUPT0 TO BE CALLED. THAT IS, TR0 TO BECOME 0.
+151F                 130     hundfifms_done:
+151F C3              131             CLR C
+1520 A28C            132             MOV C, TR0
+1522 5002            133             JNC exit                        ;condition check for whether 100ms are up
+1524 80F9            134             SJMP  hundfifms_done
+1526                 135     exit:
+1526 D002            136             POP AR2
+1528 D001            137             POP AR1
+152A 22              138             RET
+                     139             
+                     140             
+000B                 141             ORG 000BH               
+000B                 142     ISR0:
+000B C28C            143             CLR TR0
+000D 32              144             RETI
+                     145     END
+A51 MACRO ASSEMBLER  LAB4_Q1                                                              08/22/2014 16:58:20 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+ANTICLOCK. . . . .  C ADDR   015CH   A   
+ANTICLOCK1 . . . .  C ADDR   0160H   A   
+AR1. . . . . . . .  D ADDR   0001H   A   
+AR2. . . . . . . .  D ADDR   0002H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CHECK_TH1. . . . .  C ADDR   1518H   A   
+CLOCKWS. . . . . .  C ADDR   0146H   A   
+CLOCKWS1 . . . . .  C ADDR   014AH   A   
+DECREASE . . . . .  C ADDR   012EH   A   
+DEC_CHECK. . . . .  C ADDR   0128H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EXIT . . . . . . .  C ADDR   1526H   A   
+HUNDFIFMS_DONE . .  C ADDR   151FH   A   
+HUNDFIFTYMS. . . .  C ADDR   1500H   A   
+INCREASE . . . . .  C ADDR   0138H   A   
+INC_CHECK. . . . .  C ADDR   0132H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+KEEPRUN. . . . . .  C ADDR   017FH   A   
+KEEPRUN2 . . . . .  C ADDR   018BH   A   
+MAIN . . . . . . .  C ADDR   0107H   A   
+NONZERO. . . . . .  C ADDR   0142H   A   
+NOT1OR3. . . . . .  C ADDR   011FH   A   
+NOT2 . . . . . . .  C ADDR   0125H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+RUN. . . . . . . .  C ADDR   013CH   A   
+RUNBCKWD . . . . .  C ADDR   017BH   A   
+RUNFWD . . . . . .  C ADDR   0185H   A   
+SETUP. . . . . . .  C ADDR   0100H   A   
+SET_T1_AGAIN . . .  C ADDR   150EH   A   
+SPEEDS . . . . . .  C ADDR   1200H   A   
+SPEEDSBACK . . . .  C ADDR   1204H   A   
+T1LOOP . . . . . .  C ADDR   1512H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+ZEROSPEED. . . . .  C ADDR   0172H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

@@ -1,0 +1,97 @@
+A51 MACRO ASSEMBLER  HW6                                                                  09/02/2014 15:16:34 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw6.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw6\hw6.asm SET(SMALL) DEBUG PRINT(.\hw6.lst) OBJECT(.\hw6.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0H
+0000 020400            2     LJMP setup
+                       3     
+                       4     
+0400                   5     ORG 400H
+0400                   6     setup:
+0400 7598C0            7             MOV SCON, #0C0H         ;serial port mode 3, receiver enabled
+0403 758921            8             MOV TMOD, #21H      ;configure timer 1 in auto-reload mode for 1200 baud  ; TIMER 0
+                              AS 16 BIT COUNTER
+0406 758DCC            9             MOV TH1, #0CCH      ;reload value for 1200 baud 
+0409 759000           10             MOV P1,#00H         ;USE LED
+                      11     
+040C D2AF             12             SETB EA
+040E D2AC             13             SETB ES                 ;ENABLE SERIAL INTERRUPT
+0410 C2AB             14             CLR ET1                 ;DISABLE TIMER1 INTERRUPT
+0412 7E00             15             MOV R6,#00H         ;GLOBAL COUNTER
+0414 D28E             16             SETB TR1            ;start timer
+0416 D299             17             SETB TI
+                      18             
+0418                  19     MAIN:
+0418 BE32FD           20             CJNE R6, #50, MAIN        
+041B 7E00             21                     MOV R6, #00H
+041D B297             22             CPL P1.7                ;TOGGLE LED
+041F 020418           23             LJMP MAIN
+                      24             
+                      25             
+0200                  26     ORG 200H        
+0200                  27     tenmsdelay:                     ;10 MS DELAY    
+0200 7F0A             28             MOV R7, #10
+0202                  29     LOOP:
+0202 758CFF           30                     MOV TH0, #0FFH
+0205 758A40           31                     MOV TL0, #40H
+0208 D28C             32                     SETB TR0
+020A 308DFD           33                     comeagain: JNB TF0,comeagain
+020D C28C             34                     CLR TR0
+020F C28D             35                     CLR TF0
+0211 DFEF             36                     DJNZ R7, LOOP   
+0213 22               37     RET
+                      38     
+0023                  39     ORG 0023H
+0023                  40     SERIAL_ISR:
+0023 0E               41             INC R6  
+0024 5100             42             ACALL tenmsdelay
+0026 C299             43             CLR TI
+0028 7441             44             MOV A, #'A'
+002A 3400             45             ADDC A, #00H
+002C A2D0             46             MOV C, PSW.0
+002E 929B             47             MOV TB8, C          ;MOVE PARITY BIT TO TB8
+0030 F599             48             MOV SBUF, A         ;START SENDING CHARACTER   
+0032 32               49     RETI    
+                      50     
+                      51     END
+A51 MACRO ASSEMBLER  HW6                                                                  09/02/2014 15:16:34 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+COMEAGAIN. . . . .  C ADDR   020AH   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ES . . . . . . . .  B ADDR   00A8H.4 A   
+ET1. . . . . . . .  B ADDR   00A8H.3 A   
+LOOP . . . . . . .  C ADDR   0202H   A   
+MAIN . . . . . . .  C ADDR   0418H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+PSW. . . . . . . .  D ADDR   00D0H   A   
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SERIAL_ISR . . . .  C ADDR   0023H   A   
+SETUP. . . . . . .  C ADDR   0400H   A   
+TB8. . . . . . . .  B ADDR   0098H.3 A   
+TENMSDELAY . . . .  C ADDR   0200H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

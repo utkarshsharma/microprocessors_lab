@@ -1,0 +1,143 @@
+A51 MACRO ASSEMBLER  LAB3Q1                                                               08/12/2014 05:06:29 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab3q1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab3\lab3q1.asm SET(SMALL) DEBUG PRINT(.\lab3q1.lst) OBJECT(.\lab3q1.ob
+                      j) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     org 00h
+0000 020050            2     ljmp main
+                       3     USING 0
+                       4     
+0050                   5     org 50h
+0050                   6     main:
+0050 758901            7     MOV TMOD,#001h          ;16 bit counter mode
+                       8     
+0053 122000            9     LCALL read
+0056 905000           10     MOV DPTR, #DATA1
+                      11     
+0059                  12     loop:
+0059 EF               13     MOV A,R7
+005A 93               14     MOVC A, @A+DPTR
+005B FC               15     MOV R4,A
+005C EF               16     MOV A, R7
+005D 04               17     INC A
+005E 0F               18     INC R7
+005F 93               19     MOVC A, @A+DPTR
+0060 FB               20     MOV R3,A
+0061 12201B           21     LCALL twoscomp
+                      22     
+0064 D2A9             23     SETB    ET0
+0066 D2AF             24     SETB    EA
+                      25     
+0068 8B8C             26     MOV TH0,R3
+006A 8C8A             27     MOV TL0,R4
+006C D28C             28     SETB TR0
+006E D297             29     SETB P1.7
+                      30     
+0070 80FE             31     sq_wave:SJMP sq_wave
+                      32     
+0072 1F               33     DEC R7
+0073 80E4             34     SJMP loop
+                      35     
+2000                  36     org 2000h
+2000                  37     read:
+2000 C000             38     PUSH AR0
+2002 C0E0             39     PUSH ACC
+2004 75900F           40     MOV P1,#00FH            ;clearing first 4 bits in advance to make last 4 bits of memory loc
+                             ation 0
+2007 E590             41     MOV A,P1
+2009 F8               42     MOV R0,A
+200A E590             43     MOV A,P1
+200C 98               44     SUBB A,R0                       ; check if both values read are equal
+200D B400F0           45     CJNE A,#000H,read
+                      46     
+                      47     ;NEXT PART OF CODE DOUBLES THE INDEX READ FROM THE SWITCH
+2010 75F002           48     MOV B,#002H
+2013 E8               49     MOV A,R0
+2014 A4               50     MUL AB
+2015 FF               51     MOV R7,A
+2016 D0E0             52     POP ACC
+2018 D000             53     POP AR0
+201A 22               54     RET
+                      55     
+201B                  56     twoscomp:                       ;take bit-by-bitcomplement and add 1
+A51 MACRO ASSEMBLER  LAB3Q1                                                               08/12/2014 05:06:29 PAGE     2
+
+201B C0E0             57     PUSH ACC
+201D EC               58     MOV A,R4                        ;LSB
+201E F4               59     CPL A
+201F C3               60     CLR C
+2020 2401             61     ADD A,#1
+2022 FC               62     MOV R4,A
+2023 EB               63     MOV A,R3                        ;MSB
+2024 F4               64     CPL A 
+                      65     
+2025 4004             66     JC carry                        ;if carry from LSB, jump to carry
+2027 FB               67     MOV R3,A                        ;otherwise, take complement directly
+2028 D0E0             68     pop ACC
+202A 22               69     RET
+                      70     
+202B                  71     carry:
+202B 2401             72     ADD A,#1                        ;adding carry 1 to complement
+202D FB               73     MOV R3,A
+202E D0E0             74     POP ACC
+2030 22               75     RET
+                      76     
+                      77     
+4000                  78     org 4000h
+4000                  79     ISR:
+4000 C28C             80     CLR             TR0                                     
+4002 8C8C             81     MOV             TH0,R4          
+4004 8B8A             82     MOV             TL0,R3
+4006 B297             83     CPL             P1.7
+4008 D28C             84     SETB    TR0                                     
+400A 32               85     RETI
+                      86     
+5000                  87     org 5000h
+5000 1A112410         88     DATA1: DB 1AH, 11H, 24H, 10H, 3CH, 0FH, 61H, 0EH, 93H, 0DH, 0CFH, 0CH, 17H, 0CH, 6AH, 0BH, 
+                             0C6H, 0AH, 2BH, 0AH, 99H, 09H, 0FH, 09H, 8DH, 08H, 12H, 08H, 9EH, 07H, 31H, 07H
+5004 3C0F610E                
+5008 930DCF0C                
+500C 170C6A0B                
+5010 C60A2B0A                
+5014 99090F09                
+5018 8D081208                
+501C 9E073107                
+                      89     
+                      90     END
+A51 MACRO ASSEMBLER  LAB3Q1                                                               08/12/2014 05:06:29 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+AR0. . . . . . . .  D ADDR   0000H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CARRY. . . . . . .  C ADDR   202BH   A   
+DATA1. . . . . . .  C ADDR   5000H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+ISR. . . . . . . .  C ADDR   4000H   A   
+LOOP . . . . . . .  C ADDR   0059H   A   
+MAIN . . . . . . .  C ADDR   0050H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+READ . . . . . . .  C ADDR   2000H   A   
+SQ_WAVE. . . . . .  C ADDR   0070H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWOSCOMP . . . . .  C ADDR   201BH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

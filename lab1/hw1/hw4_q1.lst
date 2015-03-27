@@ -1,0 +1,133 @@
+A51 MACRO ASSEMBLER  HW4_Q1                                                               08/18/2014 15:02:16 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw4_q1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw4\hw4_q1.asm SET(SMALL) DEBUG PRINT(.\hw4_q1.lst) OBJECT(.\hw4_q1.obj
+                      ) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 0000H
+                       2             USING 0
+0000 021000            3             LJMP setup
+                       4     
+1000                   5             ORG 1000H       
+1000                   6     setup:
+1000 758901            7             MOV TMOD, #001h
+1003 D2A9              8             SETB ET0                        ;ENABLE INTERRUPTS FOR T1 AND T0
+1005 D2AF              9             SETB EA
+                      10     
+1007                  11     reset:
+1007 7901             12             MOV R1, #001h           ;R1 is dedicated to lighting LEDs. But LEDs are the upper 4
+                              bits. We'll swap this later.
+                      13             
+1009                  14     MAIN:
+1009 A890             15             MOV R0, P1                      ;Switches being read here
+100B E8               16             MOV A, R0                       ;Check if we have to terminate
+100C 540F             17             ANL A,#0fh
+100E 6040             18             JZ terminate
+1010 F8               19             MOV R0,A                        ;R0 now has the value on switch
+                      20             
+1011                  21     LEDs:
+1011 E9               22             MOV A, R1
+1012 C4               23             SWAP A                          ;LEDs are higher 4 bits of P1
+1013 F590             24             MOV P1, A
+1015 75F002           25             MOV B, #002h
+1018 E9               26             MOV A, R1
+1019 A4               27             MUL AB                          ;Next input is always double of previous time
+101A F9               28             MOV R1, A                       ;R1 being set for the next turn 
+                      29                     
+101B                  30     foursteps:      
+101B 121500           31             LCALL hundredms
+101E D8FB             32             DJNZ R0, foursteps      ;Delay = (value on switch)*100ms
+                      33             
+1020 B910E6           34             CJNE R1, #010h,MAIN ;Check if LEDs have completed their cycle
+1023 021007           35             LJMP reset
+                      36     
+                      37     
+                      38     
+1500                  39             ORG 1500H
+1500                  40     hundredms:
+1500 C001             41             PUSH AR1
+1502 C002             42             PUSH AR2
+                      43     ;MOVING 00 TO TH0 AND TL0
+1504 758C00           44             MOV TH0, #00h   
+1507 758A00           45             MOV TL0, #00h
+                      46     
+150A D28C             47             SETB TR0                                        ;START TIMER1. STOPS ONLY WHEN 100m
+                             s ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+150C 7A04             48             MOV R2, #04h                                    ;NO. OF TIMES WE HAVE TO RUN T0 FRO
+                             M 00 TO FE FOR 100ms
+150E                  49     set_t1_again:
+150E DA02             50             DJNZ R2, t1loop                                 ;CHECKING IF 100ms ARE DONE
+1510 800D             51             sjmp hundms_done
+1512                  52     t1loop:
+                      53     ;RESET TH0 AND TL0 if 100ms NOT UP
+1512 758C00           54             MOV TH0, #00h
+A51 MACRO ASSEMBLER  HW4_Q1                                                               08/18/2014 15:02:16 PAGE     2
+
+1515 758A00           55             MOV TL0, #00h
+                      56     ;CHECK TH0 AND STOP IT FROM OVERFLOWING BECAUSE 100ms ARE NOT UP
+1518                  57     check_th1:
+1518 A98C             58             MOV R1, TH0
+151A B9FEFB           59             CJNE R1, #0feh, check_th1
+151D 80EF             60             SJMP set_t1_again
+                      61     ;NOW 100ms ALMOST DONE. WAIT FOR INTERRUPT0 TO BE CALLED. THAT IS, TR0 TO BECOME 0.
+151F                  62     hundms_done:
+151F C3               63             CLR C
+1520 A28C             64             MOV C, TR0
+1522 5002             65             JNC exit                        ;condition check for whether 100ms are up
+1524 80F9             66             SJMP  hundms_done
+1526                  67     exit:
+1526 D002             68             POP AR2
+1528 D001             69             POP AR1
+152A 22               70             RET
+                      71             
+                      72             
+000B                  73             ORG 000BH               
+000B                  74     ISR0:
+000B C28C             75             CLR TR0
+000D 32               76             RETI
+                      77     
+1050                  78             ORG 1050H
+1050                  79     terminate:
+1050 759000           80             MOV P1,#000h
+                      81     END
+A51 MACRO ASSEMBLER  HW4_Q1                                                               08/18/2014 15:02:16 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AR1. . . . . . . .  D ADDR   0001H   A   
+AR2. . . . . . . .  D ADDR   0002H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+CHECK_TH1. . . . .  C ADDR   1518H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EXIT . . . . . . .  C ADDR   1526H   A   
+FOURSTEPS. . . . .  C ADDR   101BH   A   
+HUNDMS_DONE. . . .  C ADDR   151FH   A   
+HUNDREDMS. . . . .  C ADDR   1500H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+LEDS . . . . . . .  C ADDR   1011H   A   
+MAIN . . . . . . .  C ADDR   1009H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+RESET. . . . . . .  C ADDR   1007H   A   
+SETUP. . . . . . .  C ADDR   1000H   A   
+SET_T1_AGAIN . . .  C ADDR   150EH   A   
+T1LOOP . . . . . .  C ADDR   1512H   A   
+TERMINATE. . . . .  C ADDR   1050H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

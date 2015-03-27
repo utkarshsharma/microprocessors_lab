@@ -1,0 +1,113 @@
+A51 MACRO ASSEMBLER  HW7_2                                                                09/22/2014 16:53:07 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw7_2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw7\hw7_2.asm SET(SMALL) DEBUG PRINT(.\hw7_2.lst) OBJECT(.\hw7_2.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+  00C3                 2             SPCON EQU 0C3h
+  00C4                 3             SPSTA EQU 0C4h
+  00C5                 4             SPDAT EQU 0C5h
+                       5     
+0000 2100              6             JMP MAIN
+                       7     
+0100                   8     ORG 100H
+0100                   9     MAIN:
+0100 75C35D           10             MOV SPCON, #01011101B                                   ;BaudRate=3MHz
+0103 D2A1             11             SETB P2.1                                                               ;Disable DA
+                             C
+0105 C2A2             12             CLR P2.2                                                                ;Enable ADC
+0107 75C501           13             MOV SPDAT, #01H                                                 ;Initialize ADC
+                      14             
+010A                  15             SPIF1:
+010A E5C4             16             MOV A,SPSTA
+010C 30E7FB           17             JNB ACC.7,SPIF1
+                      18             
+010F 75C580           19             MOV SPDAT, #10000000B                                   ;Configuring ADC
+                      20             
+0112                  21             SPIF2:
+0112 E5C4             22             MOV A,SPSTA
+0114 30E7FB           23             JNB ACC.7,SPIF2
+                      24             
+0117 E5C5             25             MOV A, SPDAT                                                    ;B8,B9 received in 
+                             the last two bits are only useful
+0119 5403             26             ANL A, #03H
+011B 23               27             RL A
+011C 23               28             RL A
+011D 4400             29             ORL A, #00110000H                                               ;Setting A up for s
+                             ending to DAC
+011F F9               30             MOV R1, A
+                      31             
+0120 75C500           32             MOV SPDAT, #00H
+0123                  33             SPIF3:
+0123 E5C4             34             MOV A,SPSTA
+0125 30E7FB           35             JNB ACC.7,SPIF3
+                      36             
+0128 85C5F0           37             MOV B, SPDAT                                                    ;B7-B0 received.
+012B E9               38             MOV A,R1
+012C C5F0             39             XCH A,B                                                                 ;Exchanging
+                              A and B because operations can only be done on A
+012E 33               40             RLC A
+012F 92F6             41             MOV B.6,C                                                               ;Moving Las
+                             t B7-B6 to the higher byte that is going to be sent to DAC
+0131 33               42             RLC A
+0132 92F7             43             MOV B.7,C
+0134 C3               44             CLR C                                                                   ;A and B se
+                             t up for sending to DAC. B contains the first 8 bits. A contains last 8 bits.
+0135 C2E7             45             CLR ACC.7
+0137 C2E6             46             CLR ACC.6
+0139 F9               47             MOV R1, A
+                      48             
+013A D2A2             49             SETB P2.2                                                               ;Disable AD
+                             C
+013C C2A1             50             CLR P2.1                                                                ;Enable DAC
+                      51             
+A51 MACRO ASSEMBLER  HW7_2                                                                09/22/2014 16:53:07 PAGE     2
+
+013E 85F0C5           52             MOV SPDAT, B                                                    ;Send first 8 bits 
+                             to DAC
+                      53             
+0141                  54             SPIF4:
+0141 E5C4             55             MOV A,SPSTA
+0143 30E7FB           56             JNB ACC.7,SPIF4
+                      57             
+0146 89C5             58             MOV SPDAT, R1                                                   ;Send Last 8 bits t
+                             o DAC
+                      59             
+0148                  60             SPIF5:
+0148 E5C4             61             MOV A,SPSTA
+014A 30E7FB           62             JNB ACC.7,SPIF5
+                      63             
+014D D2A1             64             SETB P2.1
+014F 80AF             65             JMP MAIN
+                      66     
+                      67     END
+A51 MACRO ASSEMBLER  HW7_2                                                                09/22/2014 16:53:07 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+B. . . . . . . . .  D ADDR   00F0H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+SPCON. . . . . . .  N NUMB   00C3H   A   
+SPDAT. . . . . . .  N NUMB   00C5H   A   
+SPIF1. . . . . . .  C ADDR   010AH   A   
+SPIF2. . . . . . .  C ADDR   0112H   A   
+SPIF3. . . . . . .  C ADDR   0123H   A   
+SPIF4. . . . . . .  C ADDR   0141H   A   
+SPIF5. . . . . . .  C ADDR   0148H   A   
+SPSTA. . . . . . .  N NUMB   00C4H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

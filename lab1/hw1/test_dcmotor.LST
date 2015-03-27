@@ -1,0 +1,141 @@
+A51 MACRO ASSEMBLER  TEST_DCMOTOR                                                         08/18/2014 16:36:04 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN test_dcmotor.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE test_dcmotor.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 0000H
+                       2             USING 0
+0000 021000            3             LJMP setup
+                       4     
+1000                   5             ORG 1000H       
+1000                   6     setup:
+1000 758901            7             MOV TMOD, #001h
+1003 D2A9              8             SETB ET0                        ;ENABLE INTERRUPTS FOR T1 AND T0
+1005 D2AF              9             SETB EA
+1007 758D00           10             MOV TH1, #00h
+100A 758B00           11             MOV TL1, #00h
+100D D28E             12             SETB TR1
+100F 7D00             13             MOV R5, #00h
+                      14             
+1011                  15     MAIN:
+1011 BD0004           16             CJNE R5,#00h, S2
+1014 740B             17             MOV A, #0BH
+1016 8002             18             SJMP S3 ;READ
+1018 7402             19     S2:     MOV A, #02H
+101A 540F             20     S3:     ANL A, #0FH
+101C F8               21             MOV R0, A                       ;R0-->Time for which LED should be ON
+101D 7414             22             MOV A, #14h
+101F 98               23             SUBB A, R0
+1020 D297             24             SETB P1.7
+                      25     
+1022                  26     on:
+1022 121500           27             LCALL hundredms
+1025 D8FB             28             DJNZ R0, on
+                      29     
+1027 F9               30             MOV R1, A                               ;R1-->Time for which LED should be OFF
+1028 C297             31             CLR P1.7
+                      32                     
+                      33                     
+102A                  34     off:    
+102A 121500           35             LCALL hundredms
+102D D9FB             36             DJNZ R1, off    
+102F 308F0D           37             JNB TF1, JUMP
+1032 C28E             38             CLR TR1
+1034 ED               39             MOV A, R5
+1035 F4               40             CPL A
+1036 FD               41             MOV R5,A
+1037 758D00           42             MOV TH1, #00h
+103A 758B00           43             MOV TL1, #00h
+103D D28E             44             SETB TR1
+103F                  45     JUMP:
+103F 021011           46             LJMP MAIN
+                      47     
+1500                  48             ORG 1500H
+1500                  49     hundredms:
+1500 C001             50             PUSH AR1
+1502 C002             51             PUSH AR2
+                      52     ;MOVING 00 TO TH0 AND TL0
+1504 758C00           53             MOV TH0, #00h   
+1507 758A00           54             MOV TL0, #00h
+                      55     
+150A D28C             56             SETB TR0                                        ;START TIMER1. STOPS ONLY WHEN 100m
+                             s ARE COMPLETED. THIS GIVES US ONE 100ms LOOP.
+150C 7A04             57             MOV R2, #04h                                    ;NO. OF TIMES WE HAVE TO RUN T0 FRO
+A51 MACRO ASSEMBLER  TEST_DCMOTOR                                                         08/18/2014 16:36:04 PAGE     2
+
+                             M 00 TO FE FOR 100ms
+150E                  58     set_t1_again:
+150E DA02             59             DJNZ R2, t1loop                                 ;CHECKING IF 100ms ARE DONE
+1510 800D             60             sjmp hundms_done
+1512                  61     t1loop:
+                      62     ;RESET TH0 AND TL0 if 100ms NOT UP
+1512 758C00           63             MOV TH0, #00h
+1515 758A00           64             MOV TL0, #00h
+                      65     ;CHECK TH0 AND STOP IT FROM OVERFLOWING BECAUSE 100ms ARE NOT UP
+1518                  66     check_th1:
+1518 A98C             67             MOV R1, TH0
+151A B9FEFB           68             CJNE R1, #0feh, check_th1
+151D 80EF             69             SJMP set_t1_again
+                      70     ;NOW 100ms ALMOST DONE. WAIT FOR INTERRUPT0 TO BE CALLED. THAT IS, TR0 TO BECOME 0.
+151F                  71     hundms_done:
+151F C3               72             CLR C
+1520 A28C             73             MOV C, TR0
+1522 5002             74             JNC exit                        ;condition check for whether 100ms are up
+1524 80F9             75             SJMP  hundms_done
+1526                  76     exit:
+1526 D002             77             POP AR2
+1528 D001             78             POP AR1
+152A 22               79             RET
+                      80             
+                      81             
+000B                  82             ORG 000BH               
+000B                  83     ISR0:
+000B C28C             84             CLR TR0
+000D 32               85             RETI
+                      86     
+                      87     END
+A51 MACRO ASSEMBLER  TEST_DCMOTOR                                                         08/18/2014 16:36:04 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AR1. . . . . . . .  D ADDR   0001H   A   
+AR2. . . . . . . .  D ADDR   0002H   A   
+CHECK_TH1. . . . .  C ADDR   1518H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET0. . . . . . . .  B ADDR   00A8H.1 A   
+EXIT . . . . . . .  C ADDR   1526H   A   
+HUNDMS_DONE. . . .  C ADDR   151FH   A   
+HUNDREDMS. . . . .  C ADDR   1500H   A   
+ISR0 . . . . . . .  C ADDR   000BH   A   
+JUMP . . . . . . .  C ADDR   103FH   A   
+MAIN . . . . . . .  C ADDR   1011H   A   
+OFF. . . . . . . .  C ADDR   102AH   A   
+ON . . . . . . . .  C ADDR   1022H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+S2 . . . . . . . .  C ADDR   1018H   A   
+S3 . . . . . . . .  C ADDR   101AH   A   
+SETUP. . . . . . .  C ADDR   1000H   A   
+SET_T1_AGAIN . . .  C ADDR   150EH   A   
+T1LOOP . . . . . .  C ADDR   1512H   A   
+TF1. . . . . . . .  B ADDR   0088H.7 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

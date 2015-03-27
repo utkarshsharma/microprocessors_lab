@@ -1,0 +1,173 @@
+C51 COMPILER V9.53.0.0   LCD                                                               09/29/2014 16:10:16 PAGE 1   
+
+
+C51 COMPILER V9.53.0.0, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE lcd.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND TABS(2)
+
+line level    source
+
+   1          #include<AT89C5131.h>
+   2          #include<ctype.h>
+   3          #include<string.h>
+   4          #include<delay.h>
+   5          #include<lcd.h>
+   6          
+   7          //***********bit byte definations********************************
+   8          sbit RS = P0 ^ 0;     // Register Select line
+   9          sbit RW = P0 ^ 1;     // Read/write line
+  10          sbit EN = P0 ^ 2;     // Enable line
+  11          sbit busy = P2 ^ 7;
+  12          #define lcd P2      //lcd data port 
+  13          
+  14          //*******LCD RESET ROUTINE**********************************
+  15          void lcdReset(){
+  16   1        P0 = 0x00;
+  17   1        P2 = 0x00;
+  18   1        delay_ms(15);         // wait for more than 15ms
+  19   1        lcdCmd(0x30);
+  20   1        delay_ms(4);          // wait more than 4.1ms
+  21   1        lcdCmd(0x30);
+  22   1        delay_ms(1);          // wait more than 100us
+  23   1        lcdCmd(0x30);
+  24   1        delay_ms(1);
+  25   1        lcdCmd(0x02);     // return to home
+  26   1        delay_ms(1);
+  27   1      }
+  28          
+  29          //********LCD INITIALIZATION*********************************
+  30          void lcdInit(){
+  31   1        lcdCmd(0x38);       //8-bit, 2 Line, 5x7 Dots
+  32   1        delay_ms(10);
+  33   1        lcdCmd(0x0e);       //display cursor on
+  34   1        delay_ms(10);
+  35   1        lcdCmd(0x06);       //Entry mode, auto increment with no shift
+  36   1        delay_ms(10);
+  37   1        lcdCmd(0x01);       //clear lcd
+  38   1        delay_ms(10);
+  39   1      }
+  40          
+  41          //*********LCD COMMAND WRITE*********************************
+  42          void lcdCmd(unsigned char command){
+  43   1        delay_ms(10);       //wait
+  44   1        lcd = command;        //write data to port
+  45   1        RS = 0;           //command mode
+  46   1        RW = 0;
+  47   1        EN = 1;
+  48   1        delay_ms(10);       //enable pulse for 10ms more than enough
+  49   1        EN = 0;
+  50   1        delay_ms(10);
+  51   1      }
+  52          
+  53          
+  54          //********LCD DISPLAY LONG HEX 0XFFFF*********************** 
+  55          void lcdx16(unsigned int number){
+C51 COMPILER V9.53.0.0   LCD                                                               09/29/2014 16:10:16 PAGE 2   
+
+  56   1        lcdx8((number >> 8)&(0x00ff));    //display upper two hex digits
+  57   1        lcdx8((number)&(0x00ff));     //display lower two hex deigits
+  58   1      }
+  59          
+  60          
+  61          //********LCD DISPLAY SHORT HEX 0XFF************************
+  62          void lcdx8(unsigned char number){
+  63   1        lcdChar(ascii((number >> 4)&(0x0f)));     //display MSB hex digit after converting it into ascii
+  64   1        lcdChar(ascii((number)&(0x0f)));      //display LSB hex digit after converting it into ascii
+  65   1      }
+  66          
+  67          //********LCD DISPLAY CHAR**********************************
+  68          void lcdChar(unsigned char character){
+  69   1        delay_ms(1);                //wait
+  70   1        lcd = character;              //write data to port
+  71   1        RS = 1;                   //data display mode
+  72   1        RW = 0;
+  73   1        EN = 1;
+  74   1        delay_ms(1);                  //en pulse of more than 1 ms
+  75   1        EN = 0;
+  76   1        delay_ms(1);
+  77   1      }
+  78          
+  79          //***********COVERT HEX TO TO ASCII VALUE********************
+  80          //***********TAKES A 8BIT NUMBER REPRESENTING 4 BIT HEX******
+  81          unsigned char ascii(unsigned char character){
+  82   1        if (character > 9)return (character - 9 + 0x40);        //A-F
+  83   1        else return (character + 0x30);               //0-9
+  84   1      }
+  85          
+  86          void lcdInt99(unsigned int num)
+  87          {
+  88   1         lcdChar((num/10)+0x30);
+  89   1         lcdChar((num%10)+0x30);
+  90   1      }
+  91          
+  92          void lcdString(char *string_ptr)
+  93          {
+  94   1        while (*string_ptr)
+  95   1          lcdChar(*string_ptr++);
+  96   1      }
+  97          
+  98          void lcdXY(char row, char col)
+  99          {
+ 100   1        char pos;
+ 101   1      
+ 102   1        if (row < 2)
+ 103   1        {
+ 104   2          pos = 0x80 | (row << 6); // take the line number
+ 105   2          //row0->pos=0x80  row1->pos=0xc0
+ 106   2      
+ 107   2          if (col < 16)
+ 108   2            pos = pos + col;            //take the char number
+ 109   2          //now pos points to the given XY pos
+ 110   2      
+ 111   2          lcdCmd(pos);         // Move the Cursor specified Position
+ 112   2        }
+ 113   1      }
+ 114          
+ 115          void lcdClear()
+ 116          {
+ 117   1        lcdCmd(0x01); // Clear the LCD and go to First line First Position
+C51 COMPILER V9.53.0.0   LCD                                                               09/29/2014 16:10:16 PAGE 3   
+
+ 118   1      }
+ 119          
+ 120          void lcdDate(char day, char month, char year)
+ 121          {
+ 122   1        lcdChar(((day >> 4) & 0x0f) + 0x30);
+ 123   1        lcdChar((day & 0x0f) + 0x30);
+ 124   1        lcdChar('/');
+ 125   1      
+ 126   1        lcdChar(((month >> 4) & 0x0f) + 0x30);
+ 127   1        lcdChar((month & 0x0f) + 0x30);
+ 128   1        lcdChar('/');
+ 129   1      
+ 130   1        lcdChar(((year >> 4) & 0x0f) + 0x30);
+ 131   1        lcdChar((year & 0x0f) + 0x30);
+ 132   1      }
+ 133          
+ 134          void lcdTime(char hour, char min, char sec)
+ 135          {
+ 136   1        lcdChar(((hour >> 4) & 0x0f) + 0x30);
+ 137   1        lcdChar((hour & 0x0f) + 0x30);
+ 138   1        lcdChar(':');
+ 139   1      
+ 140   1        lcdChar(((min >> 4) & 0x0f) + 0x30);
+ 141   1        lcdChar((min & 0x0f) + 0x30);
+ 142   1        lcdChar(':');
+ 143   1      
+ 144   1        lcdChar(((sec >> 4) & 0x0f) + 0x30);
+ 145   1        lcdChar((sec & 0x0f) + 0x30);
+ 146   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    491    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

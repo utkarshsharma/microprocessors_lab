@@ -1,0 +1,200 @@
+A51 MACRO ASSEMBLER  Q1_L4                                                                08/22/2014 17:16:55 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN q1_l4.OBJ
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE q1_l4.asm SET(SMALL) DEBUG EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+0000 020100            2     LJMP    MAIN
+                       3     
+0100                   4     ORG 100H
+0100 7F00              5     MAIN:   MOV R7 , #00H           ; R7 STORES SPEED               
+                       6             
+0102 7A00              7                     MOV R2 , #00H           ; INITIALISING
+0104 D290              8                     SETB    P1.0            ; To ready it for input
+0106 D291              9                     SETB    P1.1
+0108 D292             10                     SETB    P1.2
+010A D293             11                     SETB    P1.3
+010C E590             12                     MOV A , P1
+010E 5403             13                     ANL A , #00000011B
+0110 8AF0             14                     MOV B , R2                      ; OLD VALUE IN R2 MOVED TO B
+0112 FA               15                     MOV R2 , A                      ; R2 STORES OLD SWITCH INPUT
+0113 95F0             16                     SUBB A , B
+0115 2402             17                     ADD A , #02D
+                      18                     
+0117 B40103           19                     CJNE A , #01D , LABX1   ; TWO BIT INPUT OF SWITCH IS COMPARED TO ITS PREVIO
+                             US VALUE
+011A 020135           20                     LJMP DECR                               
+011D B40303           21     LABX1:  CJNE A , #03D , LABX2   ; FOUR POSSIBLE CASES OF CHANGE, AND ONE FOR REMAINING SAME
+0120 020135           22                     LJMP DECR
+0123 B40003           23     LABX2:  CJNE A , #00D , LABX3
+0126 02013F           24                     LJMP INCR
+0129 B40403           25     LABX3:  CJNE A , #04D , LABX4
+012C 02013F           26                     LJMP INCR
+012F B40200           27     LABX4:  CJNE A , #02D , LABD1
+0132 020149           28     LABD1:  LJMP RUN
+                      29     
+                      30     
+0135 BFF903           31     DECR:   CJNE R7 , #-7D , DECI   ; TO CHECK SATURATION
+0138 020149           32                     LJMP RUN
+013B 1F               33     DECI:   DEC R7                                  ; DECREMENT SPEED HERE/ OR INCREASE IN NEGA
+                             TIVE DIRECTION 
+013C 020149           34                     LJMP RUN
+                      35     
+013F BF0703           36     INCR:   CJNE R7 , #7D , INCRI   ;  TO CHECK SATURATION
+0142 020149           37                     LJMP RUN
+0145 0F               38     INCRI:  INC R7                                  ; INCREASE SPEED HERE/ OR DECREASE IN NEGAT
+                             IVE DIRECTION 
+0146 020149           39                     LJMP RUN
+                      40                     
+0149 BF0003           41     RUN:    CJNE R7 , #0D , LAZ             ; CHECK FOR ZERO SPEED
+014C 020194           42                     LJMP ZERO
+014F C3               43     LAZ:    CLR C
+0150 74B0             44                     MOV A , #0B0H                    
+0152 9F               45                     SUBB A , R7                             ; NEGATIVE OR 2S COMPELEMENT IS GRA
+                             TER THAN 0B0H,
+0153 4003             46                     JC RUN_BACK                             ; HENCE C WILL BE ACTIVATED IF R7 I
+                             S NEGATIVE
+0155 020176           47                     LJMP RUN_FORW
+                      48     
+0158                  49     RUN_BACK:
+0158 75B08F           50                     MOV             P3,             #8FH
+015B 1201A2           51                     LCALL   DELAYB
+015E 75B04F           52                     MOV             P3,             #4FH
+0161 1201A2           53                     LCALL   DELAYB
+A51 MACRO ASSEMBLER  Q1_L4                                                                08/22/2014 17:16:55 PAGE     2
+
+0164 75B02F           54                     MOV             P3,             #2FH
+0167 1201A2           55                     LCALL   DELAYB
+016A 75B01F           56                     MOV     P3,             #1FH
+016D 1201A2           57                     LCALL   DELAYB
+0170 1201D3           58                     LCALL   MAINC1
+0173 020158           59                     LJMP    RUN_BACK
+                      60                     
+0176                  61     RUN_FORW:
+0176 75B01F           62                     MOV             P3,             #1FH
+0179 1201B0           63                     LCALL   DELAYF
+017C 75B02F           64                     MOV             P3,             #2FH
+017F 1201B0           65                     LCALL   DELAYF
+0182 75B04F           66                     MOV             P3,             #4FH
+0185 1201B0           67                     LCALL   DELAYF
+0188 75B08F           68                     MOV     P3,             #8FH
+018B 1201B0           69                     LCALL   DELAYF
+018E 1201D3           70                     LCALL   MAINC1
+0191 020176           71                     LJMP    RUN_FORW
+                      72     
+0194 D2B4             73     ZERO:   SETB    P3.4            
+0196 D2B5             74                     SETB    P3.5
+0198 D2B6             75                     SETB    P3.6
+019A D2B7             76                     SETB    P3.7
+019C 1201D3           77                     LCALL MAINC1
+019F 020194           78                     LJMP ZERO
+                      79     
+01A2                  80     DELAYB: 
+01A2 EF               81                     MOV A , R7
+01A3 2408             82                     ADD A , #08D
+01A5 75F003           83                     MOV B , #03D
+01A8 A4               84                     MUL AB
+01A9 FD               85                     MOV R5 , A
+01AA 1201C0           86                     LAX1:   LCALL DELAY     
+01AD DDFB             87                     DJNZ R5 , LAX1
+01AF 22               88                     RET
+                      89     
+01B0                  90     DELAYF:
+01B0 EF               91                     MOV A , R7                      
+01B1 FD               92                     MOV R5 , A
+01B2 7408             93                     MOV A , #08D
+01B4 9D               94                     SUBB A , R5
+01B5 75F003           95                     MOV B , #03D
+01B8 A4               96                     MUL AB
+01B9 FD               97                     MOV R5 , A
+01BA 1201C0           98                     LAX2:   LCALL DELAY     
+01BD DDFB             99                     DJNZ R5 , LAX2
+01BF 22              100                     RET
+                     101     
+01C0 758C00          102     DELAY:  MOV TH0 , #000H                 ; DELAY FUNCTION GENERATES 33 MILISEC OF DELAY 
+01C3 758A00          103                     MOV TL0 , #000H
+01C6 758901          104                     MOV TMOD, #01H
+01C9 D28C            105                     SETB TR0
+01CB 308DFD          106                     TLOOP: JNB TF0,TLOOP
+01CE C28C            107                     CLR TR0
+01D0 C28D            108                     CLR TF0
+01D2 22              109                     RET
+                     110     
+01D3 D290            111     MAINC1: SETB    P1.0            ; To ready it for input
+01D5 D291            112                     SETB    P1.1
+01D7 D292            113                     SETB    P1.2
+01D9 D293            114                     SETB    P1.3
+01DB E590            115                     MOV A , P1
+01DD 5403            116                     ANL A , #00000011B
+01DF 8AF0            117                     MOV B , R2                      ; OLD VALUE IN R2 MOVED TO B
+01E1 FA              118                     MOV R2 , A                      ; R2 STORES OLD SWITCH INPUT
+01E2 95F0            119                     SUBB A , B
+A51 MACRO ASSEMBLER  Q1_L4                                                                08/22/2014 17:16:55 PAGE     3
+
+01E4 2402            120                     ADD A , #02D
+                     121                     
+01E6 B40103          122                     CJNE A , #01D , LABZ1
+01E9 020135          123                     LJMP DECR
+01EC B40303          124     LABZ1:  CJNE A , #03D , LABZ2
+01EF 020135          125                     LJMP DECR
+01F2 B40003          126     LABZ2:  CJNE A , #00D , LABZ3
+01F5 02013F          127                     LJMP INCR
+01F8 B40403          128     LABZ3:  CJNE A , #04D , LABZ4
+01FB 02013F          129                     LJMP INCR
+01FE B40200          130     LABZ4:  CJNE A , #02D , LABS1
+0201 22              131     LABS1:  RET
+                     132     
+                     133     END
+A51 MACRO ASSEMBLER  Q1_L4                                                                08/22/2014 17:16:55 PAGE     4
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+DECI . . . . . . .  C ADDR   013BH   A   
+DECR . . . . . . .  C ADDR   0135H   A   
+DELAY. . . . . . .  C ADDR   01C0H   A   
+DELAYB . . . . . .  C ADDR   01A2H   A   
+DELAYF . . . . . .  C ADDR   01B0H   A   
+INCR . . . . . . .  C ADDR   013FH   A   
+INCRI. . . . . . .  C ADDR   0145H   A   
+LABD1. . . . . . .  C ADDR   0132H   A   
+LABS1. . . . . . .  C ADDR   0201H   A   
+LABX1. . . . . . .  C ADDR   011DH   A   
+LABX2. . . . . . .  C ADDR   0123H   A   
+LABX3. . . . . . .  C ADDR   0129H   A   
+LABX4. . . . . . .  C ADDR   012FH   A   
+LABZ1. . . . . . .  C ADDR   01ECH   A   
+LABZ2. . . . . . .  C ADDR   01F2H   A   
+LABZ3. . . . . . .  C ADDR   01F8H   A   
+LABZ4. . . . . . .  C ADDR   01FEH   A   
+LAX1 . . . . . . .  C ADDR   01AAH   A   
+LAX2 . . . . . . .  C ADDR   01BAH   A   
+LAZ. . . . . . . .  C ADDR   014FH   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+MAINC1 . . . . . .  C ADDR   01D3H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+RUN. . . . . . . .  C ADDR   0149H   A   
+RUN_BACK . . . . .  C ADDR   0158H   A   
+RUN_FORW . . . . .  C ADDR   0176H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TLOOP. . . . . . .  C ADDR   01CBH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+ZERO . . . . . . .  C ADDR   0194H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

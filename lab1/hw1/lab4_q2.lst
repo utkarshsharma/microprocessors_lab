@@ -1,0 +1,142 @@
+A51 MACRO ASSEMBLER  LAB4_Q2                                                              08/22/2014 17:25:58 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab4_q2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab4\lab4_q2.asm SET(SMALL) DEBUG PRINT(.\lab4_q2.lst) OBJECT(.\lab4_q2
+                      .obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+0000 020100            2             LJMP setup
+                       3             
+0100                   4     ORG     0100H
+                       5     
+0100                   6     setup:  
+0100 758915            7             MOV     TMOD,   #015H           ; 16 bit timer mode for T1 and 16 bit counter mode 
+                             for T0
+0103 758C00            8             MOV     TH0,    #000H
+0106 758A00            9             MOV     TL0,    #000H
+0109 D2AF             10             SETB EA                                 ; To enable interrupts
+010B D2AB             11             SETB ET1
+                      12             
+010D D2B4             13             SETB P3.4                               ;Configure T0 as a counter
+010F D28C             14             SETB TR0                                ;Start Counter
+0111 7B1F             15             MOV     R3, #031D                       ;Timer1 Interrupt has to be called this man
+                             y times to make 1 second
+0113 758D00           16             MOV     TH1, #000H
+0116 758B00           17             MOV     TL1, #000H
+0119 D28E             18             SETB TR1
+                      19     
+011B                  20     MAIN:
+011B 75908F           21             MOV P1, #08FH
+                      22             
+011E E590             23             MOV A, P1                               ;Reading from the Switches
+0120 540F             24             ANL A, #0FH
+0122 FA               25             MOV R2, A                               ;R2-->Time for which LED should be ON
+0123 D2B0             26             SETB P3.0                               ;To DC Motor
+                      27     
+0125 7414             28             MOV A, #14h
+0127 9A               29             SUBB A, R2
+0128 D2B0             30             SETB P3.0
+012A F9               31             MOV R1, A                               ;R1-->Time for which LED should be OFF
+                      32     
+                      33     
+012B                  34     motoron:
+012B 12013A           35             LCALL onems
+012E DAFB             36             DJNZ R2, motoron
+                      37     
+0130 C2B0             38             CLR P3.0
+                      39                     
+0132                  40     motoroff:       
+0132 12013A           41             LCALL onems
+0135 D9FB             42             DJNZ R1, motoroff       
+                      43     
+0137 02011B           44             LJMP MAIN
+                      45     
+013A                  46     onems:                                                  ;THIS LOOP GENERATES A DELAY OF 1MS
+013A 7EEA             47             MOV R6, # 0EAH
+013C 7F04             48             MOV R7, # 004D
+013E                  49     notdone:
+013E DEFE             50             DJNZ R6, $
+0140 DFFC             51             DJNZ R7, notdone
+0142 22               52             RET
+                      53     
+001B                  54     ORG 001BH
+001B                  55     ISR1:
+A51 MACRO ASSEMBLER  LAB4_Q2                                                              08/22/2014 17:25:58 PAGE     2
+
+001B C28E             56             CLR             TR1
+001D BB001F           57             CJNE    R3,      #0000H, keepgoing
+0020 C28C             58             CLR TR0
+0022 E58A             59             MOV A, TL0
+0024 20E70F           60             JB ACC.7, sev_to_4
+0027 20E60B           61             JB ACC.6, six_to_3
+002A 20E507           62             JB ACC.5, five_to_2
+002D 20E403           63             JB ACC.4, four_to_1
+0030 C4               64             SWAP A
+0031 8003             65             sjmp display
+0033                  66     four_to_1:
+0033 23               67             RL A
+0034                  68     five_to_2:
+0034 23               69             RL A
+0035                  70     six_to_3:
+0035 23               71             RL A
+0036                  72     sev_to_4:
+                      73     
+0036                  74     display:
+0036 F590             75             MOV P1 , A
+0038 7B1F             76             MOV     R3, #031D
+003A D28C             77             SETB TR0
+003C                  78     returni:
+003C D28E             79             SETB TR1
+003E 32               80             RETI
+                      81             
+003F                  82     keepgoing:
+003F 758D00           83             MOV             TH1 , #00H
+0042 758B00           84             MOV             TL1 , #00H
+0045 1B               85             DEC             R3
+0046 80F4             86             sjmp returni
+                      87     
+                      88     END
+A51 MACRO ASSEMBLER  LAB4_Q2                                                              08/22/2014 17:25:58 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+ACC. . . . . . . .  D ADDR   00E0H   A   
+DISPLAY. . . . . .  C ADDR   0036H   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+ET1. . . . . . . .  B ADDR   00A8H.3 A   
+FIVE_TO_2. . . . .  C ADDR   0034H   A   
+FOUR_TO_1. . . . .  C ADDR   0033H   A   
+ISR1 . . . . . . .  C ADDR   001BH   A   
+KEEPGOING. . . . .  C ADDR   003FH   A   
+MAIN . . . . . . .  C ADDR   011BH   A   
+MOTOROFF . . . . .  C ADDR   0132H   A   
+MOTORON. . . . . .  C ADDR   012BH   A   
+NOTDONE. . . . . .  C ADDR   013EH   A   
+ONEMS. . . . . . .  C ADDR   013AH   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P3 . . . . . . . .  D ADDR   00B0H   A   
+RETURNI. . . . . .  C ADDR   003CH   A   
+SETUP. . . . . . .  C ADDR   0100H   A   
+SEV_TO_4 . . . . .  C ADDR   0036H   A   
+SIX_TO_3 . . . . .  C ADDR   0035H   A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TL1. . . . . . . .  D ADDR   008BH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

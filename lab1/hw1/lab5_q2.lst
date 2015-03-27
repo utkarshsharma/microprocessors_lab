@@ -1,0 +1,125 @@
+C51 COMPILER V9.52.0.0   LAB5_Q2                                                           08/27/2014 06:10:37 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LAB5_Q2
+OBJECT MODULE PLACED IN .\lab5_q2.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\lab5\lab5_q2.c BROWSE DEBUG OBJECTEXTEND PRINT(.\lab5_q2.lst) TABS(2) OB
+                    -JECT(.\lab5_q2.obj)
+
+line level    source
+
+   1          #include <AT89C5131.h>
+   2          //*******DECLARING VARIABLES**********************************
+   3          
+   4            
+   5            unsigned char ii=0;
+   6            unsigned char jj=0;
+   7            sbit out = P1^7;
+   8            bit enablebit=1;
+   9            unsigned char higherHT;
+  10            unsigned char lowerHT;
+  11          
+  12            unsigned char note_index;
+  13            unsigned char duration_value;
+  14            unsigned char note_value;
+  15            unsigned int half_value;
+  16            unsigned char half_index;
+  17            unsigned char octave;
+  18            unsigned int octave1;
+  19            
+  20            unsigned int Halfperiod [12]= { 3900, 3681, 3476, 3279, 3096, 2925, 2757, 2600, 2456, 2319, 2189, 2066 };
+  21            unsigned char Notes [18]= {0, 2, 4, 5, 7, 9, 11, 16, 64, 16, 11, 9, 7, 5, 4, 2, 0, 0 };
+  22            unsigned char Durations[18]= {200, 100, 100, 100, 200, 100, 100, 200, 100, 200, 100, 100, 200, 100, 100, 
+             -100, 200, 00};
+  23            void tenmsdelay();
+  24            
+  25          void serial_int (void) interrupt 1
+  26          { 
+  27   1        if (enablebit==1)
+  28   1        {
+  29   2          out=~out;
+  30   2        }
+  31   1        TH0=higherHT;
+  32   1        TL0=lowerHT;
+  33   1      } 
+  34          
+  35            
+  36          void main()
+  37          {   TMOD=0x11;
+  38   1          ET0=1;
+  39   1          EA=1;
+  40   1      
+  41   1        for( note_index=0; note_index < 18; note_index++)
+  42   1        {
+  43   2          duration_value = Durations[note_index];
+  44   2          if (duration_value == 0){break;}
+  45   2          note_value = Notes[note_index];
+  46   2          octave1 = note_value & 0xF0;
+  47   2          octave1= octave1>>4 & 0x0F;
+  48   2          octave= octave1;
+  49   2          half_index = note_value & 0x0F;
+  50   2          
+  51   2          half_value = Halfperiod[half_index];
+  52   2          enablebit=1;
+  53   2          if(octave == 0x01)
+C51 COMPILER V9.52.0.0   LAB5_Q2                                                           08/27/2014 06:10:37 PAGE 2   
+
+  54   2          {
+  55   3            enablebit=1;
+  56   3            half_value = half_value/2 ;
+  57   3          }
+  58   2          if(octave == 0x02)
+  59   2          { 
+  60   3            enablebit=1;
+  61   3            half_value = half_value*2 ;
+  62   3          }
+  63   2          if(octave > 0x02) 
+  64   2          {
+  65   3            enablebit=0;
+  66   3            half_value = 0xFFFF ;
+  67   3          }
+  68   2          half_value=0x00-half_value;
+  69   2          higherHT=half_value>>8 & 0x00FF;
+  70   2          TH0=higherHT;
+  71   2          lowerHT=half_value & 0x00FF;
+  72   2          TL0=lowerHT;
+  73   2          TR0=1;
+  74   2          
+  75   2          for (jj=0; jj<duration_value; jj++)
+  76   2          tenmsdelay();
+  77   2        } 
+  78   1          out = 0;
+  79   1      }
+  80          
+  81          void tenmsdelay()
+  82          {
+  83   1            for (ii=0; ii<5; ii++)
+  84   1            {
+  85   2              TH1=0x0c;
+  86   2              TL1=0x30;
+  87   2              TR1=1;
+  88   2              while(1)
+  89   2              {
+  90   3                if(TF1==1)
+  91   3                {
+  92   4                  TF1=0;
+  93   4                  TR1=0;
+  94   4                  break;
+  95   4                }
+  96   3              }
+  97   2            }
+  98   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    226    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     73    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

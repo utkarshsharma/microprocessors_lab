@@ -1,0 +1,121 @@
+A51 MACRO ASSEMBLER  HW7Q2                                                                09/23/2014 16:25:11 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\hw7q2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw7\hw7q2.asm SET(SMALL) DEBUG PRINT(.\hw7q2.lst) OBJECT(.\hw7q2.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     
+0000                   2     ORG 000h
+  00C3                 3     SPCON equ 00C3h
+  00C4                 4     SPSTA equ 0C4h
+  00C5                 5     DATAREG equ 0C5h
+                       6     
+0000 2100              7     JMP setup
+                       8     
+0100                   9     ORG 0100h
+                      10     
+0100                  11     setup:
+0100 75C33F           12             MOV SPCON,#00111111b            ;Baud Rate = 3MHz
+0103 43C340           13             ORL SPCON,#01000000b
+                      14             
+0106                  15     MAIN:
+0106 C2A2             16             CLR P2.2                                        ;Enable ADC
+0108 75C501           17             MOV DATAREG,#01h                        ;Start Bit
+                      18             
+010B                  19     SPIF0:
+010B 85C4F0           20             MOV B,SPSTA
+010E 30F7FA           21             JNB B.7,SPIF0                           ;Wait for SPIF to be high
+                      22             
+0111 75C580           23             MOV DATAREG,#10000000b          ;Set ADC as single-ended and Channel as 0
+                      24             
+0114                  25     SPIF1:
+0114 85C4F0           26             MOV B,SPSTA
+0117 30F7FA           27             JNB B.7,SPIF1                           ;Wait again for SPIF to be high
+                      28     
+011A 85C5F0           29             MOV B,DATAREG                           ;Read ADC highest 2 bits        
+011D 53F003           30             ANL B,#00000011b
+0120 E5F0             31             MOV A,B
+0122 23               32             RL A
+0123 23               33             RL A
+0124 752030           34             MOV 0020h,#00110000b            ;Set Control bits
+0127 4520             35             ORL A,0020h
+0129 F520             36             MOV 0020h,A                             ;Store first 6 bits to be sent to DAC in 20
+                             h
+                      37     
+012B 75C500           38             MOV DATAREG,#00h                        ;Send random bits to recover later 8 bits o
+                             f ADC
+                      39             
+012E                  40     SPIF2:
+012E 85C4F0           41             MOV B,SPSTA
+0131 30F7FA           42             JNB B.7,SPIF2                           ;Wait for SPIF to be high
+                      43     
+0134 85C5F0           44             MOV B,DATAREG                           ;Read ADC lower 8 bits
+0137 E5F0             45             MOV A,B
+0139 54C0             46             ANL A,#11000000b
+013B 23               47             RL A
+013C 23               48             RL A
+013D 4520             49             ORL A,0020h
+013F F520             50             MOV 0020h,A                             ;Store the next two bits in 20h
+                      51     
+0141 E5F0             52             MOV A,B
+0143 23               53             RL A
+0144 23               54             RL A
+0145 F5F0             55             MOV B,A
+0147 C2F1             56             CLR B.1
+A51 MACRO ASSEMBLER  HW7Q2                                                                09/23/2014 16:25:11 PAGE     2
+
+0149 C2F0             57             CLR B.0
+014B 85F021           58             MOV 0021h,B                     ;Store later 6 bits of ADC and last two cits as 0
+                      59     
+014E D2A2             60             SETB P2.2                               ;Disable ADC
+0150 C2A0             61             CLR P2.0                                ;Enable DAC
+0152 8520C5           62             MOV DATAREG,0020h               ;Send control bits and first 4 bits of ADC output t
+                             o DAC
+                      63             
+0155                  64     SPIF3:
+0155 85C4F0           65             MOV B,SPSTA
+0158 30F7FA           66             JNB B.7,SPIF3                   ;Wait for SPIF to be high
+                      67             
+015B 8521C5           68             MOV DATAREG,0021h               ;Send next 8 bits
+                      69             
+015E                  70     SPIF4:
+015E 85C4F0           71             MOV B,SPSTA
+0161 30F7FA           72             JNB B.7,SPIF4                   ;Wait for SPIF to be high
+                      73             
+0164 D2A0             74             SETB P2.0                               ;Disable DAC
+0166 020106           75             LJMP MAIN                               ;Transmit data continuously
+                      76     
+0169                  77     endLoop:
+0169 80FE             78             JMP endLoop
+                      79     
+                      80     END
+A51 MACRO ASSEMBLER  HW7Q2                                                                09/23/2014 16:25:11 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+DATAREG. . . . . .  N NUMB   00C5H   A   
+ENDLOOP. . . . . .  C ADDR   0169H   A   
+MAIN . . . . . . .  C ADDR   0106H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+SETUP. . . . . . .  C ADDR   0100H   A   
+SPCON. . . . . . .  N NUMB   00C3H   A   
+SPIF0. . . . . . .  C ADDR   010BH   A   
+SPIF1. . . . . . .  C ADDR   0114H   A   
+SPIF2. . . . . . .  C ADDR   012EH   A   
+SPIF3. . . . . . .  C ADDR   0155H   A   
+SPIF4. . . . . . .  C ADDR   015EH   A   
+SPSTA. . . . . . .  N NUMB   00C4H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

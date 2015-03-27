@@ -1,0 +1,109 @@
+A51 MACRO ASSEMBLER  LAB7Q1_1                                                             09/22/2014 15:50:31 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab7q1_1.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab7\lab7q1_1.asm SET(SMALL) DEBUG PRINT(.\lab7q1_1.lst) OBJECT(.\lab7q
+                      1_1.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 00H
+  00C3                 2     SPCON EQU 00C3H ;TO SET BAUD RATE, CLOCK POLARITY, ETC
+  00C4                 3     SPIF EQU 00C4H ;SERIAL PERIPHERAL DATA TRANSFER FLAG
+  00C5                 4     DATAREGISTER EQU 0C5H
+0000 02011C            5     LJMP START
+                       6     
+0100                   7     ORG 100H
+0100 70717273          8     DATA1: DB 01110000B,01110001B,01110010B,01110011B,01110100B,01110101B,01110110B,01110111B,0
+                             1111000B,01111001B,01111010B,01111011B,01111100B,01111101B,01111110B,01111111B
+0104 74757677                
+0108 78797A7B                
+010C 7C7D7E7F                
+                       9     
+0110                  10     WAIT:
+0110 85C4F0           11             MOV B, SPIF
+0113 30F7FA           12             JNB B.7, WAIT
+0116 22               13     RET
+                      14     
+0117                  15     DELAY:
+0117 7E20             16             MOV R6, #020H
+0119                  17             LOOP1: 
+0119 DEFE             18                     DJNZ R6, LOOP1
+011B 22               19     RET
+                      20     
+011C                  21     START:
+011C 75C37F           22             MOV SPCON, #01111111B ;BAUD RATE = 3MHz 
+011F 7800             23             MOV R0, #0H
+0121                  24             TRIANGLEUP:
+0121 900100           25                     MOV DPTR, #100H
+0124 28               26                     ADD A, R0
+0125 93               27                     MOVC A, @A+DPTR
+0126 F9               28                     MOV R1, A
+0127 C2A0             29                     CLR P2.0 ;CHIP SELECT FOR DAC
+0129 89C5             30                     MOV DATAREGISTER, R1
+012B 120110           31                     LCALL WAIT
+012E 75C500           32                     MOV DATAREGISTER, #0H
+0131 120110           33                     LCALL WAIT
+                      34                     ;LCALL DELAY
+0134 D2A0             35                     SETB P2.0
+0136 08               36                     INC R0
+0137 B80F03           37                     CJNE R0, #00001111B, CONTINUE
+013A 020140           38                     LJMP TRIANGLEDOWN
+013D                  39                     CONTINUE:
+013D 020121           40                             LJMP TRIANGLEUP
+                      41             
+0140                  42             TRIANGLEDOWN:
+0140 18               43                     DEC R0
+0141 900100           44                     MOV DPTR, #100H
+0144 28               45                     ADD A, R0
+0145 93               46                     MOVC A, @A+DPTR
+0146 F9               47                     MOV R1, A
+0147 C2A0             48                     CLR P2.0
+0149 89C5             49                     MOV DATAREGISTER, R1
+014B 120110           50                     LCALL WAIT
+014E 75C500           51                     MOV DATAREGISTER, #0H
+0151 120110           52                     LCALL WAIT
+0154 D2A0             53                     SETB P2.0
+A51 MACRO ASSEMBLER  LAB7Q1_1                                                             09/22/2014 15:50:31 PAGE     2
+
+                      54                     ;LCALL DELAY
+0156 B80003           55                     CJNE R0, #0H, CONTINUE2
+0159 020121           56                     LJMP TRIANGLEUP
+015C                  57                     CONTINUE2:
+015C 020140           58                             LJMP TRIANGLEDOWN
+                      59                             
+                      60                     
+                      61     END
+                             
+                                             
+                                             
+                                     
+A51 MACRO ASSEMBLER  LAB7Q1_1                                                             09/22/2014 15:50:31 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+CONTINUE . . . . .  C ADDR   013DH   A   
+CONTINUE2. . . . .  C ADDR   015CH   A   
+DATA1. . . . . . .  C ADDR   0100H   A   
+DATAREGISTER . . .  N NUMB   00C5H   A   
+DELAY. . . . . . .  C ADDR   0117H   A   
+LOOP1. . . . . . .  C ADDR   0119H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+SPCON. . . . . . .  N NUMB   00C3H   A   
+SPIF . . . . . . .  N NUMB   00C4H   A   
+START. . . . . . .  C ADDR   011CH   A   
+TRIANGLEDOWN . . .  C ADDR   0140H   A   
+TRIANGLEUP . . . .  C ADDR   0121H   A   
+WAIT . . . . . . .  C ADDR   0110H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

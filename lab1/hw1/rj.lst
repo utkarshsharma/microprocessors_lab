@@ -1,0 +1,107 @@
+A51 MACRO ASSEMBLER  RJ                                                                   08/11/2014 01:46:57 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\rj.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw3\rj.asm SET(SMALL) DEBUG PRINT(.\rj.lst) OBJECT(.\rj.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000 7881              1     MOV R0,#81H
+0002 7982              2     MOV R1,#82H
+                       3     
+0004 76FF              4     MOV @R0,#0FFH   ;R0 MSB
+0006 77FF              5     MOV @R1,#0FFH   ;R1 LSB
+                       6     
+0008 E6                7     MOV A,@R0
+0009 FB                8     MOV R3,A                        ;R3 MSB
+                       9     
+000A E7               10     MOV A,@R1
+000B FC               11     MOV R4,A                        ;R4 LSB
+                      12     
+000C 1207DA           13     LCALL TWOS_COMPLEMENT
+                      14     
+                      15     
+000F 758901           16     MOV TMOD,#01H
+0012 8B8C             17     MOV TH0,R3
+0014 8C8A             18     MOV TL0,R4
+                      19     
+0016 D294             20     SETB P1.4
+0018 C295             21     CLR P1.5
+001A D296             22     SETB P1.6
+001C C297             23     CLR P1.7
+                      24     
+001E                  25     REPEAT:
+                      26     
+001E B294             27     CPL P1.4
+0020 B295             28     CPL P1.5
+0022 B296             29     CPL P1.6
+0024 B297             30     CPL P1.7
+                      31     
+0026 7B2A             32     MOV R3,#42
+                      33     
+0028                  34     BACK:
+0028 1207D0           35     LCALL DELAY
+002B DBFB             36     DJNZ R3,BACK
+                      37     
+002D 80EF             38     SJMP REPEAT
+                      39     
+                      40     
+                      41     
+                      42     
+07D0                  43     ORG 2000
+                      44     
+07D0                  45     DELAY:
+07D0 D28C             46     SETB TR0
+07D2 308DFD           47     AGAIN: JNB TF0,AGAIN
+07D5 C28C             48     CLR TR0
+07D7 C28D             49     CLR TF0
+07D9 22               50     RET
+                      51     
+                      52     
+07DA                  53     TWOS_COMPLEMENT:   ;INPUT IS R3-MSB,R4-LSB
+07DA EC               54     MOV A,R4
+07DB F4               55     CPL A
+07DC C3               56     CLR C
+07DD 2401             57     ADD A,#1
+07DF FC               58     MOV R4,A
+A51 MACRO ASSEMBLER  RJ                                                                   08/11/2014 01:46:57 PAGE     2
+
+07E0 EB               59     MOV A,R3
+07E1 F4               60     CPL A 
+                      61     
+07E2 4002             62     JC NEXT
+07E4 FB               63     MOV R3,A
+07E5 22               64     RET
+                      65     
+07E6                  66     NEXT:
+07E6 2401             67     ADD A,#1
+07E8 FB               68     MOV R3,A
+07E9 22               69     RET
+                      70     END
+A51 MACRO ASSEMBLER  RJ                                                                   08/11/2014 01:46:57 PAGE     3
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AGAIN. . . . . . .  C ADDR   07D2H   A   
+BACK . . . . . . .  C ADDR   0028H   A   
+DELAY. . . . . . .  C ADDR   07D0H   A   
+NEXT . . . . . . .  C ADDR   07E6H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+REPEAT . . . . . .  C ADDR   001EH   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TWOS_COMPLEMENT. .  C ADDR   07DAH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

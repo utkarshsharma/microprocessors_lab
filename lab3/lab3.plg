@@ -1,0 +1,26 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+U:\Acads 5th Sem\EE 337 Lab\p51 programs\lab3\lab3.uvproj
+Project File Date:  08/11/2014
+
+<h2>Output:</h2>
+Build target 'Target 1'
+linking...
+Program Size: data=8.0 xdata=0 code=8320
+creating hex file from "lab3"...
+"lab3" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling lab3_q1.asm...
+linking...
+Program Size: data=8.0 xdata=0 code=640
+creating hex file from "lab3"...
+"lab3" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+assembling lab3_q1.asm...
+linking...
+Program Size: data=8.0 xdata=0 code=603
+creating hex file from "lab3"...
+"lab3" - 0 Error(s), 0 Warning(s).

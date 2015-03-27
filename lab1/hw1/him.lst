@@ -1,0 +1,80 @@
+A51 MACRO ASSEMBLER  HIM                                                                  08/01/2014 15:39:51 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\him.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab1\him.asm SET(SMALL) DEBUG PRINT(.\him.lst) OBJECT(.\him.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1     ORG 0000h
+0000 020100            2     LJMP MAIN
+                       3     
+0100                   4     ORG 0100h
+0100                   5     MAIN:
+                       6     
+0100 7981              7     MOV r1, #81h ;MSB
+0102 7882              8     MOV r0, #82h ;LSB
+0104 76FF              9     MOV @r0, #0ffh
+0106 77FF             10     MOV @r1, #0ffh
+0108 7A00             11     MOV r2,#0h
+010A 7B0F             12     MOV r3,#00fh
+                      13     
+010C                  14     LED:
+010C 7590F0           15     MOV P1,#0f0h
+                      16     
+010F                  17     LOOP1: 
+010F 120122           18     LCALL DELAY
+0112 DBFB             19     DJNZ r3,LOOP1
+0114 7B0F             20     MOV r3,#00fh
+                      21     
+0116 759000           22     MOV P1,#00h
+                      23     
+0119                  24     LOOP2:
+0119 120122           25     LCALL DELAY
+011C DBFB             26     DJNZ r3,LOOP2
+011E 7B0F             27     MOV r3,#00fh
+                      28     
+0120 80EA             29     SJMP LED
+                      30     
+0122                  31     DELAY:
+0122 87F0             32     MOV B,@r1
+                      33     ;INC B
+                      34     
+0124 D5F002           35     L1: DJNZ B,L2
+0127 8004             36     SJMP L3
+                      37     
+0129 DAFE             38     L2: DJNZ r2,L2
+012B 80F7             39     SJMP L1
+                      40     
+012D 86F0             41     L3:MOV B,@r0  ;LSB
+                      42     
+012F D5F0FD           43     L4: DJNZ B,L4 ;LSB
+0132 22               44     RET
+                      45     
+                      46     END
+A51 MACRO ASSEMBLER  HIM                                                                  08/01/2014 15:39:51 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+DELAY. . . . . . .  C ADDR   0122H   A   
+L1 . . . . . . . .  C ADDR   0124H   A   
+L2 . . . . . . . .  C ADDR   0129H   A   
+L3 . . . . . . . .  C ADDR   012DH   A   
+L4 . . . . . . . .  C ADDR   012FH   A   
+LED. . . . . . . .  C ADDR   010CH   A   
+LOOP1. . . . . . .  C ADDR   010FH   A   
+LOOP2. . . . . . .  C ADDR   0119H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

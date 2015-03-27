@@ -1,0 +1,351 @@
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE LAB8_FRAUD
+OBJECT MODULE PLACED IN .\lab8_fraud.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE C:\Users\Utkarsh\Downloads\lab8_fraud.c BROWSE DEBUG OBJECTEXTEND PRINT(.\l
+                    -ab8_fraud.lst) TABS(2) OBJECT(.\lab8_fraud.obj)
+
+line level    source
+
+   1          //#include <AT89C5131.h>
+   2          #include <reg51.h>
+   3          //#include <string.h>
+   4          
+   5          sbit rs=P0^0;
+   6          sbit rw=P0^1;
+   7          sbit en=P0^2;
+   8          bit flag=0;
+   9          sbit check=P2^7;
+  10          
+  11          unsigned char month[3];
+  12          unsigned char day[3];
+  13          unsigned char character;
+  14          unsigned char array[7]={0x00,0x21,0x17,0x05,0x10,0x10,0x14};
+  15          unsigned char p;
+  16          
+  17          /*void month_converter(unsigned char a)
+  18          {
+  19            switch(a)
+  20            {
+  21              case 1: month="JAN";break;
+  22              case 2: month="FEB";break;
+  23              case 3: month="MAR";break;
+  24              case 4: month="APR";break;
+  25              case 5: month="MAY";break;
+  26              case 6: month="JUN";break;
+  27              case 7: month="JUL";break;
+  28              case 8: month="AUG";break;
+  29              case 9: month="SEP";break;
+  30              case 16: month="OCT";break;
+  31              case 17: month="NOV";break;
+  32              case 18: month="DEC";break;
+  33            }
+  34          }
+  35          */
+  36          
+  37          void incr_sec_tens(void)
+  38          {
+  39   1        unsigned char a;
+  40   1        a=array[0];
+  41   1        a=(a&0xF0)>>4;
+  42   1        a++;
+  43   1        if((a>5)||(array[0]>59))
+  44   1          a=0;
+  45   1        array[0]&=0x0F;
+  46   1        array[0]|=(a<<4);
+  47   1      }
+  48          
+  49          void incr_sec_units(void)
+  50          {
+  51   1        unsigned char a;
+  52   1        a=array[0];
+  53   1        a=a&0x0F;
+  54   1        a++;
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 2   
+
+  55   1        if((a>9)||(array[0]>59))
+  56   1          a=0;
+  57   1        array[0]&=0xF0;
+  58   1        array[0]|=a;
+  59   1      }
+  60          
+  61          void month_converter(unsigned char a)
+  62          {
+  63   1        switch(a)
+  64   1        {
+  65   2          case 1: month[0]='J';
+  66   2                  month[1]='A';
+  67   2                  month[2]='N';
+  68   2                  break;
+  69   2          case 2: month[0]='F';
+  70   2                  month[1]='E';
+  71   2                  month[2]='B';
+  72   2                  break;
+  73   2          case 3: month[0]='M';
+  74   2                  month[1]='A';
+  75   2                  month[2]='R';
+  76   2                  break;
+  77   2          case 4: month[0]='A';
+  78   2                  month[1]='P';
+  79   2                  month[2]='R';
+  80   2                  break;
+  81   2          case 5: month[0]='M';
+  82   2                  month[1]='A';
+  83   2                  month[2]='Y';
+  84   2                  break;
+  85   2          case 6: month[0]='J';
+  86   2                  month[1]='U';
+  87   2                  month[2]='N';
+  88   2                  break;
+  89   2          case 7: month[0]='J';
+  90   2                  month[1]='U';
+  91   2                  month[2]='L';
+  92   2                  break;
+  93   2          case 8: month[0]='A';
+  94   2                  month[1]='U';
+  95   2                  month[2]='G';
+  96   2                  break;
+  97   2          case 9: month[0]='S';
+  98   2                  month[1]='E';
+  99   2                  month[2]='P';
+ 100   2                  break;
+ 101   2          case 16: month[0]='O';
+ 102   2                  month[1]='C';
+ 103   2                  month[2]='T';
+ 104   2                  break;
+ 105   2          case 17: month[0]='N';
+ 106   2                  month[1]='O';
+ 107   2                  month[2]='V';
+ 108   2                  break;
+ 109   2          case 18: month[0]='D';
+ 110   2                  month[1]='E';
+ 111   2                  month[2]='C';
+ 112   2                  break;
+ 113   2        }
+ 114   1      }
+ 115          
+ 116          void day_converter(unsigned char a)
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 3   
+
+ 117          {
+ 118   1        switch(a)
+ 119   1        {
+ 120   2          case 1: day[0]='M';
+ 121   2                  day[1]='O';
+ 122   2                  day[2]='N';
+ 123   2                  break;
+ 124   2          case 2: day[0]='T';
+ 125   2                  day[1]='U';
+ 126   2                  day[2]='E';
+ 127   2                  break;
+ 128   2          case 3: day[0]='W';
+ 129   2                  day[1]='E';
+ 130   2                  day[2]='D';
+ 131   2                  break;
+ 132   2          case 4: day[0]='T';
+ 133   2                  day[1]='H';
+ 134   2                  day[2]='U';
+ 135   2                  break;
+ 136   2          case 5: day[0]='F';
+ 137   2                  day[1]='R';
+ 138   2                  day[2]='I';
+ 139   2                  break;
+ 140   2          case 6: day[0]='S';
+ 141   2                  day[1]='A';
+ 142   2                  day[2]='T';
+ 143   2                  break;
+ 144   2          case 7: day[0]='S';
+ 145   2                  day[1]='U';
+ 146   2                  day[2]='N';
+ 147   2                  break;
+ 148   2        }
+ 149   1      }
+ 150          
+ 151          void ASCII_converter(unsigned char a)
+ 152          {
+ 153   1        switch(a)
+ 154   1        {
+ 155   2          case 1: character='1';break;
+ 156   2          case 2: character='2';break;
+ 157   2          case 3: character='3';break;
+ 158   2          case 4: character='4';break;
+ 159   2          case 5: character='5';break;
+ 160   2          case 6: character='6';break;
+ 161   2          case 7: character='7';break;
+ 162   2          case 8: character='8';break;
+ 163   2          case 9: character='9';break;
+ 164   2          case 0: character='0';break;
+ 165   2        }
+ 166   1      }
+ 167          
+ 168          void lcd_ready()
+ 169           {
+ 170   1         P2=0xFF;
+ 171   1         rs=0;
+ 172   1         rw=1;
+ 173   1         while(check)
+ 174   1         {
+ 175   2           en=0;
+ 176   2           en=1;
+ 177   2         }
+ 178   1         en=0; 
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 4   
+
+ 179   1       }
+ 180             
+ 181           
+ 182          void data_write(unsigned char a)
+ 183           {
+ 184   1         lcd_ready();
+ 185   1         P2=a;
+ 186   1         rs=1;
+ 187   1         rw=0;
+ 188   1         en=1;
+ 189   1         //delay(0xFFFF);
+ 190   1         en=0;
+ 191   1       }
+ 192             
+ 193          
+ 194          void cmd_write(unsigned char a)
+ 195           {
+ 196   1         lcd_ready();
+ 197   1         P2=a;
+ 198   1         rs=0;
+ 199   1         rw=0;
+ 200   1         en=1;
+ 201   1         //delay(0xFFFF);
+ 202   1         en=0;
+ 203   1       }
+ 204          
+ 205          void init_lcd()
+ 206           {
+ 207   1         cmd_write(0x38); //2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+ 208   1         cmd_write(0x0E); //TURN ON DISPLAY, CURSOR NOT BLINKING
+ 209   1         cmd_write(0x06); //INCREMENTING THE CURSOR POSITION
+ 210   1         cmd_write(0x01); //CLEAR SCREEN
+ 211   1      
+ 212   1       }
+ 213           
+ 214          void one_sec_delay()
+ 215           {unsigned char a,b,c;
+ 216   1         
+ 217   1         for(a=0;a<255;a++)
+ 218   1          for(b=0;b<255;b++)
+ 219   1            for(c=0;c<8;c++);;
+ 220   1       }
+ 221            
+ 222          void main()
+ 223           { 
+ 224   1         while(1)
+ 225   1         {
+ 226   2         unsigned char a;
+ 227   2         init_lcd();
+ 228   2         
+ 229   2         day_converter(array[3]);
+ 230   2         month_converter(array[5]);
+ 231   2         data_write(day[0]);
+ 232   2         data_write(day[1]);
+ 233   2         data_write(day[2]);
+ 234   2         data_write(' ');
+ 235   2         
+ 236   2         a=array[4];
+ 237   2         a&=0xF0;
+ 238   2         a=a>>4;
+ 239   2         ASCII_converter(a);
+ 240   2         data_write(character);
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 5   
+
+ 241   2         a=array[4];
+ 242   2         a&=0x0F;
+ 243   2         ASCII_converter(a);
+ 244   2         data_write(character);
+ 245   2         
+ 246   2         data_write(' ');
+ 247   2         
+ 248   2         data_write(month[0]);
+ 249   2         data_write(month[1]);
+ 250   2         data_write(month[2]);
+ 251   2         data_write(' ');
+ 252   2         
+ 253   2         data_write('2');
+ 254   2         data_write('0');
+ 255   2         a=array[6];
+ 256   2         a&=0xF0;
+ 257   2         a=a>>4;
+ 258   2         ASCII_converter(a);
+ 259   2         data_write(character);
+ 260   2         a=array[6];
+ 261   2         a&=0x0F;
+ 262   2         ASCII_converter(a);
+ 263   2         data_write(character);
+ 264   2         
+ 265   2         cmd_write(0xC0); //new line
+ 266   2         
+ 267   2         data_write(' ');
+ 268   2         data_write(' ');
+ 269   2         data_write(' ');
+ 270   2         data_write(' ');
+ 271   2         
+ 272   2         a=array[2];
+ 273   2         a&=0xF0;
+ 274   2         a=a>>4;
+ 275   2         ASCII_converter(a);
+ 276   2         data_write(character);
+ 277   2         a=array[2];
+ 278   2         a&=0x0F;
+ 279   2         ASCII_converter(a);
+ 280   2         data_write(character);
+ 281   2         
+ 282   2         data_write(58); // for ':'
+ 283   2         
+ 284   2         a=array[1];
+ 285   2         a&=0xF0;
+ 286   2         a=a>>4;
+ 287   2         ASCII_converter(a);
+ 288   2         data_write(character);
+ 289   2         a=array[1];
+ 290   2         a&=0x0F;
+ 291   2         ASCII_converter(a);
+ 292   2         data_write(character);
+ 293   2         
+ 294   2         data_write(58); // for ':'
+ 295   2         
+ 296   2         a=array[0];
+ 297   2         a&=0xF0;
+ 298   2         a=a>>4;
+ 299   2         ASCII_converter(a);
+ 300   2         data_write(character);
+ 301   2         a=array[0];
+ 302   2         a&=0x0F;
+C51 COMPILER V9.52.0.0   LAB8_FRAUD                                                        10/10/2014 17:28:08 PAGE 6   
+
+ 303   2         ASCII_converter(a);
+ 304   2         data_write(character);
+ 305   2         
+ 306   2         one_sec_delay();
+ 307   2         incr_sec_units();p++;
+ 308   2         if(p==10) 
+ 309   2         {
+ 310   3           p=0;
+ 311   3           array[0]&=0xF0;
+ 312   3           incr_sec_tens();
+ 313   3         }
+ 314   2         
+ 315   2       }
+ 316   1         
+ 317   1       }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    726    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,235 @@
+C51 COMPILER V9.52.0.0   HW8                                                               09/29/2014 15:25:22 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HW8
+OBJECT MODULE PLACED IN .\hw8.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE ..\hw8\hw8.c BROWSE DEBUG OBJECTEXTEND PRINT(.\hw8.lst) TABS(2) OBJECT(.\hw
+                    -8.obj)
+
+line level    source
+
+   1          #include<AT89C5131.h>
+   2          #include<stdio.h>
+   3          
+   4          //*******DECLARING VARIABLES**********************************
+   5          
+   6            sbit RS = P0^0;
+   7            sbit RW = P0^1;
+   8            sbit EN = P0^2;
+   9            int displayvar[] = {15,22,59,1,29,9,14};
+  10          
+  11          //*******DECLARING FUNCTIONS**********************************      
+  12            void LCD_READY();
+  13            void msdelay(unsigned int time);
+  14            void init_lcd();
+  15            void CMD_WRITE(unsigned char command);
+  16            void DATA_WRITE(unsigned char character);
+  17            void STRING_WRITE(char*);
+  18          
+  19          //*******************MAIN LOOP**********************************
+  20          
+  21          void main()
+  22          {
+  23   1        init_lcd();
+  24   1        msdelay(5);
+  25   1        CMD_WRITE(0x80);
+  26   1        msdelay(5);
+  27   1        
+  28   1        switch(displayvar[3])
+  29   1            {
+  30   2                case 1:   
+  31   2                    STRING_WRITE("MON ");
+  32   2                    break;
+  33   2                case 2:   
+  34   2                    STRING_WRITE("TUE ");
+  35   2                    break;
+  36   2                case 3:   
+  37   2                    STRING_WRITE("WED ");
+  38   2                    break;
+  39   2                case 4:   
+  40   2                    STRING_WRITE("THU ");
+  41   2                    break;
+  42   2                case 5:   
+  43   2                    STRING_WRITE("FRI ");
+  44   2                    break;
+  45   2                case 6:   
+  46   2                    STRING_WRITE("SAT ");
+  47   2                    break;
+  48   2                case 7:   
+  49   2                    STRING_WRITE("SUN ");
+  50   2                    break;
+  51   2                default:
+  52   2                    break;
+  53   2            }
+  54   1      
+C51 COMPILER V9.52.0.0   HW8                                                               09/29/2014 15:25:22 PAGE 2   
+
+  55   1          DATA_WRITE((displayvar[4]/10)+48);
+  56   1          DATA_WRITE((displayvar[4]%10)+48);
+  57   1          STRING_WRITE(" ");
+  58   1          
+  59   1          switch(displayvar[5])
+  60   1            {
+  61   2                case 1:   
+  62   2                    STRING_WRITE("JAN ");
+  63   2                    break;
+  64   2                case 2:   
+  65   2                    STRING_WRITE("FEB ");
+  66   2                    break;
+  67   2                case 3:   
+  68   2                    STRING_WRITE("MAR ");
+  69   2                    break;
+  70   2                case 4:   
+  71   2                    STRING_WRITE("APR ");
+  72   2                    break;
+  73   2                case 5:   
+  74   2                    STRING_WRITE("MAY ");
+  75   2                    break;
+  76   2                case 6:   
+  77   2                    STRING_WRITE("JUN ");
+  78   2                    break;
+  79   2                case 7:   
+  80   2                    STRING_WRITE("JUL ");
+  81   2                    break;
+  82   2                case 8:   
+  83   2                    STRING_WRITE("AUG ");
+  84   2                    break;
+  85   2                case 9:   
+  86   2                    STRING_WRITE("SEP ");
+  87   2                    break;
+  88   2                case 10:    
+  89   2                    STRING_WRITE("OCT ");
+  90   2                    break;
+  91   2                case 11:    
+  92   2                    STRING_WRITE("NOV ");
+  93   2                    break;
+  94   2                case 12:    
+  95   2                    STRING_WRITE("DEC ");
+  96   2                    break;
+  97   2                default:
+  98   2                    break;
+  99   2            }
+ 100   1      
+ 101   1            DATA_WRITE(2+48);
+ 102   1            DATA_WRITE(0+48);
+ 103   1            DATA_WRITE((displayvar[6]/10)+48);
+ 104   1            DATA_WRITE((displayvar[6]%10)+48);
+ 105   1            
+ 106   1            CMD_WRITE(0xC0);
+ 107   1            
+ 108   1            STRING_WRITE("   ");
+ 109   1            DATA_WRITE((displayvar[0]/10)+48);
+ 110   1            DATA_WRITE((displayvar[0]%10)+48);
+ 111   1            STRING_WRITE(":");
+ 112   1            DATA_WRITE((displayvar[1]/10)+48);
+ 113   1            DATA_WRITE((displayvar[1]%10)+48);
+ 114   1            STRING_WRITE(":");
+ 115   1            DATA_WRITE((displayvar[2]/10)+48);
+ 116   1            DATA_WRITE((displayvar[2]%10)+48);
+C51 COMPILER V9.52.0.0   HW8                                                               09/29/2014 15:25:22 PAGE 3   
+
+ 117   1          
+ 118   1          while(1);
+ 119   1      }
+ 120          
+ 121          
+ 122          
+ 123          
+ 124          //*******DEFINING FUNCTIONS**********************************
+ 125          
+ 126          //*******LCD INITIALIZATION**********************************
+ 127          
+ 128          void LCD_READY()
+ 129          {
+ 130   1          int i,j;
+ 131   1          unsigned char a = 0xff;
+ 132   1          P2 = 0xFF;            
+ 133   1          RS = 0;               
+ 134   1          RW = 1;               
+ 135   1          for( i=0; i<=75 ; i++)
+ 136   1        {
+ 137   2          for (j=0; j<=10 ; j++);
+ 138   2          }
+ 139   1          
+ 140   1          EN = 0;
+ 141   1      }
+ 142          
+ 143          void init_lcd()
+ 144            {
+ 145   1          unsigned char a;
+ 146   1          a = 0x38;
+ 147   1          CMD_WRITE(a);    //2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+ 148   1          
+ 149   1          a = 0x0E;
+ 150   1          CMD_WRITE(a);   //TURN ON DISPLAY, CURSOR NOT BLINKING
+ 151   1        
+ 152   1          a = 0x06;       //INCREMENTING THE CURSOR POSITION
+ 153   1          CMD_WRITE(a); 
+ 154   1      
+ 155   1          
+ 156   1          a = 0x01;       //CLEAR SCREEN
+ 157   1          CMD_WRITE(a);
+ 158   1        }
+ 159          
+ 160          
+ 161          //*******ONE MILLISECOND DELAY**********************************
+ 162          void msdelay(unsigned int time)
+ 163          {
+ 164   1        unsigned int i,j;
+ 165   1        for(i=0;i<time;i++)
+ 166   1        for(j=0;j<1275;j++);
+ 167   1      }
+ 168          
+ 169          //*******WRITING A COMMAND TO THE LCD**********************************
+ 170          void CMD_WRITE(unsigned char command)
+ 171          { 
+ 172   1        LCD_READY();
+ 173   1        msdelay(100);
+ 174   1        P2 = command;
+ 175   1        RS = 0;
+ 176   1        RW = 0;
+ 177   1        EN = 1;
+ 178   1        msdelay(1);
+C51 COMPILER V9.52.0.0   HW8                                                               09/29/2014 15:25:22 PAGE 4   
+
+ 179   1        EN = 0; 
+ 180   1        msdelay(1);
+ 181   1      }
+ 182          
+ 183          //*******WRITING DATA TO THE LCD**********************************
+ 184          void DATA_WRITE(unsigned char character)
+ 185          {
+ 186   1        LCD_READY();
+ 187   1        msdelay(10);
+ 188   1        P2 = character;
+ 189   1        RS = 1;
+ 190   1        RW = 0;
+ 191   1        EN = 1;
+ 192   1        msdelay(1);
+ 193   1        EN = 0;
+ 194   1        msdelay(1);
+ 195   1      }
+ 196          
+ 197          void STRING_WRITE(char* str)        //Function to print string at once
+ 198          {     
+ 199   1          int i = 0;
+ 200   1          while(str[i] != '\0')         //While null character of string is not reached
+ 201   1          {
+ 202   2              DATA_WRITE(str[i]);
+ 203   2              i++;
+ 204   2          }
+ 205   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    664    ----
+   CONSTANT SIZE    =    103    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     14       6
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

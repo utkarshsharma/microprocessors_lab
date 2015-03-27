@@ -1,0 +1,110 @@
+C51 COMPILER V9.52.0.0   HW1                                                               10/10/2014 16:50:53 PAGE 1   
+
+
+C51 COMPILER V9.52.0.0, COMPILATION OF MODULE HW1
+OBJECT MODULE PLACED IN .\HW1.obj
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE C:\Users\Utkarsh\Downloads\HW1.c BROWSE DEBUG OBJECTEXTEND PRINT(.\HW1.lst)
+                    - TABS(2) OBJECT(.\HW1.obj)
+
+line level    source
+
+   1          #include<AT89C5131.h>     
+   2          #include "ds1307.h"   
+   3          #include "lcd.h"  
+   4          
+   5          void PowerOn()
+   6          {
+   7   1          unsigned char inner, outer;
+   8   1      
+   9   1          for (outer = 0x00; outer < 0x10; outer++) 
+  10   1          {
+  11   2              for (inner = 0x00; inner < 0xFF; inner++);
+  12   2          }
+  13   1          
+  14   1          LCD_init();
+  15   1          
+  16   1          for (inner = 0; inner < 10; inner++) 
+  17   1            LCD_delay(2);
+  18   1      }
+  19          
+  20          void send2lcd(unsigned char value)
+  21          {
+  22   1        unsigned char buf = 0;  
+  23   1        
+  24   1        buf = value & 0xF0;   /* Filter for high byte */
+  25   1        buf = (buf>>4)|(0x30);    /* Convert  to ascii code */
+  26   1      
+  27   1        LCD_putc(buf);      /* Show on LCD */
+  28   1      
+  29   1        buf = value & 0x0F;   /* Filter for low byte */
+  30   1        buf = buf | 0x30;         /* Convert to ascii code */
+  31   1      
+  32   1        LCD_putc(buf);      /* Show on LCD */
+  33   1      } 
+  34          
+  35          /***************************** Main function *************************************/
+  36          void main(void)     
+  37          {
+  38   1        unsigned char sec, min, hour, date, month, year;
+  39   1        
+  40   1        PowerOn();  
+  41   1        
+  42   1        LCD_row1(); LCD_puts("Date:");  
+  43   1        LCD_row2(); LCD_puts("Time:");  
+  44   1        
+  45   1        //DS1307_settime(0x10,0x27,0x00);   /* Set Time (hh:mm:ss) */
+  46   1        //DS1307_setdate(0x03,0x08,0x06);   /* Set Date (dd/mm/yy) */
+  47   1        
+  48   1        while(1) 
+  49   1        {
+  50   2          /* Get Date & Time */
+  51   2          sec   = DS1307_get(SEC);  
+  52   2          min   = DS1307_get(MIN);  
+  53   2          hour  = DS1307_get(HOUR);
+  54   2          date  = DS1307_get(DATE);
+C51 COMPILER V9.52.0.0   HW1                                                               10/10/2014 16:50:53 PAGE 2   
+
+  55   2          month = DS1307_get(MONTH);
+  56   2          year  = DS1307_get(YEAR);
+  57   2      
+  58   2          /* Show Date in format dd/mm/yr */
+  59   2          LCD_command(0x86);  /* Set LCD cursor at (1,6) */
+  60   2          
+  61   2          send2lcd(date);   /* Show date on LCD */
+  62   2          
+  63   2          LCD_putc('/');    
+  64   2          
+  65   2          send2lcd(month);  /* Show month on LCD */
+  66   2          
+  67   2          LCD_putc('/');  
+  68   2          
+  69   2          send2lcd(year);   /* Show year on LCD */
+  70   2      
+  71   2          /* Show Time in format hr:min:sec */  
+  72   2          LCD_command(0xC6);  /* Set LCD cursor at (2,6) */
+  73   2          
+  74   2          send2lcd(hour);   /* Show hour on LCD */
+  75   2          
+  76   2          LCD_putc(':');       
+  77   2              
+  78   2          send2lcd(min);    /* Show min on LCD */
+  79   2          
+  80   2          LCD_putc(':');    
+  81   2          
+  82   2          send2lcd(sec);    /* Show sec on LCD */
+  83   2        }    
+  84   1      } /* End main */
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    587    ----
+   CONSTANT SIZE    =     12    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----       2
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,244 @@
+A51 MACRO ASSEMBLER  Q2                                                                   08/04/2014 13:49:31 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\q2.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\hw2\q2.asm SET(SMALL) DEBUG PRINT(.\q2.lst) OBJECT(.\q2.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     ;---------------------------------------------------------------------------------
+                       2     ;TITLE  : SUB-ROUTINE FOR DISPLAY OF CHARACTER ON LCD (WITH LCD_READY)
+                       3     ;AUTHOR : AKASH SUBHASH PACHARNE (WADHWANI ELECTRONICS LAB)
+                       4     ;*NOTE* : STUDENTS SHOULD GO THROUGH "LCD control made easy" DOCUMENT POSTED ON 
+                       5     ;         MOODLE BEFORE USING THIS SUB-ROUTINE
+                       6     ;---------------------------------------------------------------------------------
+                       7     
+                       8     ;---------------------------------------------------------------------------------
+                       9     ; EQUATE: (Assembler Directive)
+                      10     ; Usage: symbol EQU expression
+                      11     ; Description:  
+                      12     ; EQU statement creates a new symbol named symbol with the value of the expression
+                      13     ;----------------------------------------------------------------------------------
+  0080                14     RS EQU P0.0
+  0081                15     RW EQU P0.1
+  0082                16     EN EQU P0.2
+                      17     ;---------------------------------------------------------------------------------
+                      18     ; ORG: (Assembler Directive)
+                      19     ; Usage: ORG expression
+                      20     ; Description: ORG directive changes the assembler's location counter to the value in 
+                      21     ; the expression. ORG defines where your program is to be located in the various sections
+                      22     ; of ROM. ***NOTE: Using ORG, it is possible to overwrite existing code or data.
+                      23     ;----------------------------------------------------------------------------------
+0000                  24     ORG 00H
+0000 020100           25     LJMP MAIN
+                      26     
+0050                  27     ORG 50H
+                      28     
+                      29     
+                      30     
+0050                  31     DELAY:  
+0050 79FF             32     MOV R1, #0FFH
+0052 7AFF             33     MOV R2, #0FFH
+0054                  34     L1: 
+0054 00               35     NOP 
+0055 D9FD             36     DJNZ R1, L1
+0057 DAFB             37     DJNZ R2, L1
+0059 22               38     RET
+                      39     
+005A                  40     CMD_WRITE:  
+005A 118F             41     ACALL LCD_READY
+005C F5A0             42     MOV P2, A
+005E C280             43     CLR RS
+0060 C281             44     CLR RW
+0062 D282             45     SETB EN
+0064 120050           46     LCALL DELAY 
+0067 C282             47     CLR EN
+0069 22               48     RET
+                      49     
+                      50     
+                      51     
+006A                  52     DATA_WRITE: 
+006A 118F             53     ACALL LCD_READY
+006C F5A0             54     MOV P2, A
+006E D280             55     SETB RS
+0070 C281             56     CLR RW
+0072 D282             57     SETB EN
+0074 120050           58     LCALL DELAY  ;WILL JUST HELP US SEE CHARACTERS BEING DISPLAYED ONE BY ONE. 
+A51 MACRO ASSEMBLER  Q2                                                                   08/04/2014 13:49:31 PAGE     2
+
+                      59                   ;ALSO, IT MAY ELIMINATE THE NEED FOR LCD_READY/BUSY CHECK!
+                      60                               ;BUT IT IS RECOMMENDED TO ALWAYS CHECK FOR LCD_BUSY.
+                      61                               ;UNCOMMENT THE CALL TO DELAY ROUTINE IF U WANT TO SEE INDIVIDUAL 
+                             CHAR
+                      62                               ;BEING WRITTEN SLOWLY ON LCD
+0077 C282             63     CLR EN
+0079 22               64     RET
+                      65     
+007A                  66     INIT_LCD:
+007A 7438             67     MOV A, #38H     ;2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+007C 12005A           68     LCALL CMD_WRITE
+007F 740E             69     MOV A, #0EH     ;TURN ON DISPLAY, CURSOR NOT BLINKING
+0081 12005A           70     LCALL CMD_WRITE
+0084 7406             71     MOV A, #06H     ;INCREMENTING THE CURSOR POSITION
+0086 12005A           72     LCALL CMD_WRITE
+0089 7401             73     MOV A, #1H      ;CLEAR SCREEN
+008B 12005A           74     LCALL CMD_WRITE
+008E 22               75     RET
+                      76     
+                      77     ;FOLLOWING SUB-ROUTINE CHECKS BUSY_FLAG AND WAITS TILL LCD IS READY
+                      78     
+008F                  79     LCD_READY:
+008F 75A0FF           80     MOV P2,#0FFH    ;MAKE P2.7 AS INPUT
+0092 C280             81     CLR RS          ;SELECT COMMAND REGISTER
+0094 D281             82     SETB RW         ;TO READ FROM LCD
+0096                  83     CHECK:  
+0096 C282             84     CLR EN
+0098 D282             85     SETB EN
+009A 20A7F9           86     JB P2.7, CHECK  ;READ BUSY FLAG UNTIL IT BECOMES ZERO
+009D C282             87     CLR EN
+009F 22               88     RET
+                      89     
+                      90     ;------------------------------------------------------------------------------------------
+                             -----
+                      91     ;LCD CHAR DISPLAY SUB-ROUTINE ENDS HERE. THE MAIN DEMONSTRATES THE USAGE OF THE SUB-ROUTINE
+                      92     ;------------------------------------------------------------------------------------------
+                             -----
+                      93     
+0100                  94     ORG 100H
+0100                  95     MAIN:  
+                      96     
+0100 12007A           97     LCALL INIT_LCD  ;INIT_LCD SUB-ROUTINE TO CONFIGURE LCD BEFORE USE
+                      98     
+                      99     ;------------------------------------------------------------------------------------------
+                             -------
+                     100     ;DATA CAN BE DISPLAYED ON LCD BY PLACING IT IN ACC AND CALLING THE SUB-ROUTINE "DATA_WRITE"
+                     101     ;------------------------------------------------------------------------------------------
+                             -------
+                     102     
+                     103     
+                     104     ;------------------------------------------------------------------------------------------
+                             ---
+                     105     ;------SPECIFY THE STRING IN THIS PART-----------------------------------------------------
+                             -------
+0103 7890            106     MOV R0,#90H
+0105 7620            107     MOV @R0,#' '
+0107 08              108     INC R0
+0108 7620            109     MOV @R0,#' '
+010A 08              110     INC R0
+010B 7645            111     MOV @R0,#'E'
+010D 08              112     INC R0
+010E 7645            113     MOV @R0,#'E'
+0110 08              114     INC R0
+0111 7620            115     MOV @R0,#' '
+0113 08              116     INC R0
+0114 7633            117     MOV @R0,#'3'
+A51 MACRO ASSEMBLER  Q2                                                                   08/04/2014 13:49:31 PAGE     3
+
+0116 08              118     INC R0
+0117 7633            119     MOV @R0,#'3'
+0119 08              120     INC R0
+011A 7637            121     MOV @R0,#'7'
+011C 08              122     INC R0
+011D 762D            123     MOV @R0,#'-'
+011F 08              124     INC R0
+0120 7620            125     MOV @R0,#' '
+0122 08              126     INC R0
+0123 764C            127     MOV @R0,#'L'
+0125 08              128     INC R0
+0126 7661            129     MOV @R0,#'a'
+0128 08              130     INC R0
+0129 7662            131     MOV @R0,#'b'
+012B 08              132     INC R0
+012C 7632            133     MOV @R0,#'2'
+012E 08              134     INC R0
+012F 7620            135     MOV @R0,#' '
+0131 08              136     INC R0
+0132 7620            137     MOV @R0,#' '
+                     138     
+                     139     
+0134 08              140     INC R0
+0135 7620            141     MOV @R0,#' '
+0137 08              142     INC R0
+0138 7655            143     MOV @R0,#'U'
+013A 08              144     INC R0
+013B 7654            145     MOV @R0,#'T'
+013D 08              146     INC R0
+013E 764B            147     MOV @R0,#'K'
+0140 08              148     INC R0
+0141 7641            149     MOV @R0,#'A'
+0143 08              150     INC R0
+0144 7652            151     MOV @R0,#'R'
+0146 08              152     INC R0
+0147 7653            153     MOV @R0,#'S'
+0149 08              154     INC R0
+014A 7648            155     MOV @R0,#'H'
+014C 08              156     INC R0
+014D 7620            157     MOV @R0,#' '
+014F 08              158     INC R0
+0150 7653            159     MOV @R0,#'S'
+0152 08              160     INC R0
+0153 7648            161     MOV @R0,#'H'
+0155 08              162     INC R0
+0156 7641            163     MOV @R0,#'A'
+0158 08              164     INC R0
+0159 7652            165     MOV @R0,#'R'
+015B 08              166     INC R0
+015C 764D            167     MOV @R0,#'M'
+015E 08              168     INC R0
+015F 7641            169     MOV @R0,#'A'
+0161 08              170     INC R0
+0162 7620            171     MOV @R0,#' '
+0164 7890            172     MOV R0,#90H
+                     173     
+                     174     
+0166                 175     LINE1:;LOOP FOR DISPLAY IN FIRST LINE OF LCD
+0166 86E0            176     MOV 0E0H,@R0
+0168 12006A          177     LCALL DATA_WRITE
+016B 08              178     INC R0;MOVE TO NEXT MEMORY LOCATION
+016C B8A0F7          179     CJNE R0,#0A0H,LINE1;CHECK IF 16 BYTES DONE
+                     180     
+016F 74C0            181     MOV A,#0C0H ;FOR MOVING TO NEXT LINE
+0171 12005A          182     LCALL CMD_WRITE
+                     183     
+A51 MACRO ASSEMBLER  Q2                                                                   08/04/2014 13:49:31 PAGE     4
+
+0174                 184     LINE2:;LOOP FOR DISPLAY IN SECOND LINE OF LCD
+0174 86E0            185     MOV 0E0H,@R0
+0176 12006A          186     LCALL DATA_WRITE
+0179 08              187     INC R0
+017A B8AFF7          188     CJNE R0,#0AFH,LINE2;
+                     189     
+017D 80FE            190     WAIT: SJMP WAIT ;KEEP WAITING HERE ONCE TASK DONE
+                     191     
+                     192     END 
+A51 MACRO ASSEMBLER  Q2                                                                   08/04/2014 13:49:31 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+CHECK. . . . . . .  C ADDR   0096H   A   
+CMD_WRITE. . . . .  C ADDR   005AH   A   
+DATA_WRITE . . . .  C ADDR   006AH   A   
+DELAY. . . . . . .  C ADDR   0050H   A   
+EN . . . . . . . .  B ADDR   0080H.2 A   
+INIT_LCD . . . . .  C ADDR   007AH   A   
+L1 . . . . . . . .  C ADDR   0054H   A   
+LCD_READY. . . . .  C ADDR   008FH   A   
+LINE1. . . . . . .  C ADDR   0166H   A   
+LINE2. . . . . . .  C ADDR   0174H   A   
+MAIN . . . . . . .  C ADDR   0100H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+RS . . . . . . . .  B ADDR   0080H.0 A   
+RW . . . . . . . .  B ADDR   0080H.1 A   
+WAIT . . . . . . .  C ADDR   017DH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

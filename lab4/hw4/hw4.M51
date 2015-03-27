@@ -1,0 +1,108 @@
+BL51 BANKED LINKER/LOCATER V6.22                                                        08/18/2014  03:30:23  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
+C:\KEIL\C51\BIN\BL51.EXE hw4_q1.obj TO hw4 RAMSIZE (256)
+
+
+INPUT MODULES INCLUDED:
+  hw4_q1.obj (HW4_Q1)
+
+
+LINK MAP OF MODULE:  hw4 (HW4_Q1)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     152EH     ABSOLUTE     
+
+
+
+SYMBOL TABLE OF MODULE:  hw4 (HW4_Q1)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        HW4_Q1
+  D:00F0H         SYMBOL        B
+  C:151BH         SYMBOL        CHECK_TH1
+  B:00A8H.7       SYMBOL        EA
+  B:00A8H.1       SYMBOL        ET0
+  C:1529H         SYMBOL        EXIT
+  C:101BH         SYMBOL        FOURSTEPS
+  C:1522H         SYMBOL        HUNDMS_DONE
+  C:1500H         SYMBOL        HUNDREDMS
+  C:000BH         SYMBOL        ISR0
+  C:1011H         SYMBOL        LEDS
+  C:1009H         SYMBOL        MAIN
+  D:0090H         SYMBOL        P1
+  C:1007H         SYMBOL        RESET
+  C:1000H         SYMBOL        SETUP
+  C:1511H         SYMBOL        SET_T1_AGAIN
+  C:1515H         SYMBOL        T1LOOP
+  C:1050H         SYMBOL        TERMINATE
+  D:008CH         SYMBOL        TH0
+  D:008AH         SYMBOL        TL0
+  D:0089H         SYMBOL        TMOD
+  B:0088H.4       SYMBOL        TR0
+  C:0000H         LINE#         3
+  C:1000H         LINE#         7
+  C:1002H         LINE#         8
+  C:1004H         LINE#         9
+  C:1007H         LINE#         12
+  C:1009H         LINE#         15
+  C:100BH         LINE#         16
+  C:100CH         LINE#         17
+  C:100EH         LINE#         18
+BL51 BANKED LINKER/LOCATER V6.22                                                      08/18/2014  03:30:23  PAGE 2
+
+
+  C:1010H         LINE#         19
+  C:1011H         LINE#         22
+  C:1012H         LINE#         23
+  C:1013H         LINE#         24
+  C:1015H         LINE#         25
+  C:1018H         LINE#         26
+  C:1019H         LINE#         27
+  C:101AH         LINE#         28
+  C:101BH         LINE#         31
+  C:101EH         LINE#         32
+  C:1020H         LINE#         34
+  C:1023H         LINE#         35
+  C:1500H         LINE#         41
+  C:1502H         LINE#         42
+  C:1504H         LINE#         43
+  C:1507H         LINE#         45
+  C:150AH         LINE#         46
+  C:150DH         LINE#         48
+  C:150FH         LINE#         49
+  C:1511H         LINE#         51
+  C:1513H         LINE#         52
+  C:1515H         LINE#         55
+  C:1518H         LINE#         56
+  C:151BH         LINE#         59
+  C:151DH         LINE#         60
+  C:1520H         LINE#         61
+  C:1522H         LINE#         64
+  C:1523H         LINE#         65
+  C:1525H         LINE#         66
+  C:1527H         LINE#         67
+  C:1529H         LINE#         69
+  C:152BH         LINE#         70
+  C:152DH         LINE#         71
+  C:000BH         LINE#         76
+  C:000DH         LINE#         77
+  C:1050H         LINE#         81
+  -------         ENDMOD        HW4_Q1
+
+******************************************************************************
+* RESTRICTED VERSION WITH 0800H BYTE CODE SIZE LIMIT; USED: 005DH BYTE ( 4%) *
+******************************************************************************
+
+Program Size: data=8.0 xdata=0 code=5422
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

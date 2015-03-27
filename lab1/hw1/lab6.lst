@@ -1,0 +1,301 @@
+A51 MACRO ASSEMBLER  LAB6                                                                 09/02/2014 20:26:27 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+OBJECT MODULE PLACED IN .\lab6.obj
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE ..\lab6\lab6.asm SET(SMALL) DEBUG PRINT(.\lab6.lst) OBJECT(.\lab6.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+0000                   1             ORG 0000H
+0000 020100            2             LJMP SETUP
+                       3             USING 0
+                       4     
+  0080                 5             RS EQU P0.0
+  0081                 6             RW EQU P0.1
+  0082                 7             EN EQU P0.2
+                       8     
+                       9     
+                      10     ;***************************************      RECEIVE PART     ****************************
+                             ******************************************************
+                      11     
+0023                  12             ORG 0023H                ;SERIAL INTERRUPT ADDRESS
+0023                  13     SERIAL_ISR:
+0023 209915           14             JB TI, EXIT
+0026 309812           15             JNB RI, EXIT
+0029 BB0F08           16             CJNE R3, #0FH, RECEIVE
+002C 7B00             17             MOV R3, #00H
+002E 7480             18             MOV A, #080H
+0030 D3               19             SETB C
+0031 122000           20             LCALL CMD_WRITE
+                      21             
+0034                  22     RECEIVE:        
+0034 0B               23             INC R3  
+0035 E599             24             MOV A, SBUF; Save this character
+0037 F7               25             MOV @R1,A
+0038 09               26             INC R1
+0039 C298             27             CLR RI ; clear receive interrupt flag
+003B                  28     EXIT:
+003B 32               29             RETI
+                      30     
+                      31     ;******************************     INITIAL SETUP      ************************************
+                             **********************************
+0100                  32     ORG 100h
+0100                  33     setup:
+0100 12201A           34             LCALL INIT_LCD          ;initialise lcd
+0103 759850           35             MOV SCON, #050H  ;serial port mode 3, receiver enabled
+0106 758921           36             MOV TMOD, #21H     ;configure timer 1 in auto-reload mode for 1200 baud  ; TIMER 0 
+                             AS 16 BIT COUNTER
+0109 758DCC           37             MOV TH1, #0CCH      ;reload value for 1200 baud
+010C 7590FF           38             MOV P1,#0FFH           ;USE SWITCHES AS INput
+                      39     
+010F D2AF             40             SETB EA            ;Enable interrupts
+0111 D2AC             41             SETB ES      ; ENABLE SERIAL INTERRUPT
+0113 7980             42             MOV R1, #80H
+0115 7B00             43             MOV R3,#00H         
+0117 D28E             44             SETB TR1            ;start timer
+0119 E590             45             MOV A, P1
+011B 540F             46             ANL A, #0FH
+011D FA               47             MOV R2, A       
+011E C298             48             CLR RI
+0120 C299             49             CLR TI
+0122 C3               50             CLR C
+                      51     
+                      52     ;************************************       TRANSMIT  DISPLAY   PART      *****************
+                             *************************************************************
+0123                  53     MAIN:
+0123 74C0             54             MOV A, #0C0H
+A51 MACRO ASSEMBLER  LAB6                                                                 09/02/2014 20:26:27 PAGE     2
+
+0125 122000           55             LCALL CMD_WRITE
+                      56     
+0128                  57     TRANSMIT_DISPLAY:
+0128 C000             58             PUSH AR0
+012A 7800             59             MOV R0, #00H
+012C                  60     DISPLAY_LOOP1:
+012C E8               61             MOV A, R0
+012D 903000           62             MOV DPTR, #DATASTORE
+0130 93               63             MOVC A,@A+DPTR
+0131 12200D           64             LCALL DATA_WRITE
+0134 08               65             INC R0
+0135 B810F4           66             CJNE R0, #10H, DISPLAY_LOOP1
+0138 D000             67             POP AR0
+                      68             
+                      69             
+                      70             
+                      71     ;*****************************************      MAIN SWITCH CHECKING PART      ************
+                             ************************************************************************
+                      72     
+013A                  73     READ_SWITCHES:
+013A 7590FF           74             MOV P1, #0FFH
+013D 5003             75             JNC GO_ON
+013F 020184           76             LJMP RECEIVE_DONE
+0142                  77     GO_ON:
+0142 E590             78             MOV A, P1
+0144 540F             79             ANL A, #0FH
+0146 7EC8             80             MOV R6, #200D
+0148                  81     DELAYLOOP:
+0148 122040           82             LCALL tenmsdelay
+014B DEFB             83             DJNZ R6, DELAYLOOP
+014D B50203           84             CJNE A, 0X02, CHECK2         ;RECHECKING THE SWITCHES FOR BETTER RELIABILITY
+0150 02013A           85             LJMP READ_SWITCHES
+                      86             
+0153                  87     CHECK2:
+0153 7590FF           88             MOV P1,#0FFH
+0156 FC               89             MOV R4, A
+0157 E590             90             MOV A, P1
+0159 540F             91             ANL A, #0FH
+015B 7EC8             92             MOV R6, #200D
+015D                  93     DELAYLOOP2:
+015D 122040           94             LCALL tenmsdelay
+0160 DEFB             95             DJNZ R6, DELAYLOOP2
+0162 B504D5           96             CJNE A, 0X04, READ_SWITCHES         ;IF DIFFERENT, GO BACK TO CHECK AGAIN
+                      97     
+                      98     
+                      99     
+                     100     
+                     101     
+                     102     ;******************************************       TRANSMIT DATA PART     ******************
+                             ****************************************************************
+0165                 103     TRANSMIT:
+0165 C299            104             CLR TI
+0167 C298            105             CLR RI
+0169 FA              106             MOV R2, A
+016A                 107     SEND_LOOP:
+016A C000            108             PUSH AR0
+016C 7800            109             MOV R0, #00H
+016E                 110     SEND_LOOP1:
+016E E8              111             MOV A, R0
+016F 903000          112             MOV DPTR, #DATASTORE
+0172 93              113             MOVC A,@A+DPTR
+0173 F599            114             MOV SBUF, A
+0175 3099FD          115     wait: JNB TI, wait
+0178 C299            116             CLR TI
+017A 08              117             INC R0
+017B B810F0          118             CJNE R0, #10H, SEND_LOOP1
+A51 MACRO ASSEMBLER  LAB6                                                                 09/02/2014 20:26:27 PAGE     3
+
+017E D000            119             POP AR0
+0180 C3              120             CLR C
+0181 02013A          121             LJMP READ_SWITCHES
+                     122     
+                     123     
+                     124     
+                     125     
+                     126     
+                     127     ;*********************************    RECEIVE DISPLAY PART    *****************************
+                             *************************************************************
+                     128     
+0184                 129     RECEIVE_DONE:
+0184 7480            130             MOV A, #80H
+0186 122000          131             LCALL CMD_WRITE
+0189 7980            132             MOV R1, #80H
+018B                 133     WRITE_RECEIVED:
+018B E7              134             MOV A, @R1
+018C 12200D          135             LCALL DATA_WRITE
+018F 09              136             INC R1
+0190 B990F8          137             CJNE R1, #90H, WRITE_RECEIVED
+0193 7980            138             MOV R1, #080H
+                     139             
+0195 7480            140             MOV A, #80H
+0197 122000          141             LCALL CMD_WRITE
+019A C3              142             CLR C
+019B 02013A          143             LJMP READ_SWITCHES
+                     144             
+                     145     
+                     146     ;******************************************     LCD RELATED CODE    ***********************
+                             *****************************************************
+2000                 147             ORG 2000H
+                     148     
+2000                 149     CMD_WRITE:  
+2000 112F            150             ACALL LCD_READY
+2002 F5A0            151             MOV P2, A
+2004 C280            152             CLR RS
+2006 C281            153             CLR RW
+2008 D282            154             SETB EN
+200A C282            155             CLR EN
+200C 22              156             RET
+                     157     
+200D                 158     DATA_WRITE: 
+200D 112F            159             ACALL LCD_READY
+200F F5A0            160             MOV P2, A
+2011 D280            161             SETB RS
+2013 C281            162             CLR RW
+2015 D282            163             SETB EN
+2017 C282            164             CLR EN
+2019 22              165             RET
+                     166     
+201A                 167     INIT_LCD:
+201A 7438            168             MOV A, #38H     ;2 LINE DISPLAY WITH 5x7 FONT ON AN 8BIT INTERFACE
+201C 122000          169             LCALL CMD_WRITE
+201F 740E            170             MOV A, #0EH     ;TURN ON DISPLAY, CURSOR NOT BLINKING
+2021 122000          171             LCALL CMD_WRITE
+2024 7406            172             MOV A, #06H     ;INCREMENTING THE CURSOR POSITION
+2026 122000          173             LCALL CMD_WRITE
+2029 7401            174             MOV A, #1H      ;CLEAR SCREEN
+202B 122000          175             LCALL CMD_WRITE
+202E 22              176             RET
+                     177     
+                     178     ;FOLLOWING SUB-ROUTINE CHECKS BUSY_FLAG AND WAITS TILL LCD IS READY
+                     179     
+202F                 180     LCD_READY:
+202F 75A0FF          181             MOV P2,#0FFH    ;MAKE P2.7 AS INPUT
+2032 C280            182             CLR RS          ;SELECT COMMAND REGISTER
+A51 MACRO ASSEMBLER  LAB6                                                                 09/02/2014 20:26:27 PAGE     4
+
+2034 D281            183             SETB RW         ;TO READ FROM LCD
+2036                 184             CHECK:  
+2036 C282            185             CLR EN
+2038 D282            186             SETB EN
+203A 20A7F9          187             JB P2.7, CHECK  ;READ BUSY FLAG UNTIL IT BECOMES ZERO
+203D C282            188             CLR EN
+203F 22              189             RET
+                     190     
+                     191     ;***************************************    DELAY CODE      *******************************
+                             ********************************************************
+                     192             
+2040                 193     tenmsdelay:        ; 10 MS DELAY        
+2040 7D0A            194             MOV R5, #10
+2042                 195     LOOP:
+2042 758CFF          196             MOV TH0, #0FFH
+2045 758A40          197             MOV TL0, #40H
+2048 D28C            198             SETB TR0
+204A 308DFD          199             comeagain: JNB TF0,comeagain
+204D C28C            200             CLR TR0
+204F C28D            201             CLR TF0
+2051 DDEF            202             DJNZ R5, LOOP   
+2053 22              203             RET
+                     204     
+                     205     
+                     206     ;******************************************************************************************
+                             *************************************
+3000                 207             ORG 3000H
+3000                 208     DATASTORE:
+3000 31324430        209             DB '1','2','D','0','7','0','0','5','2','U','T','K','A','R','S','H'
+3004 37303035                
+3008 3255544B                
+300C 41525348                
+                     210     
+                     211     
+                     212     END
+A51 MACRO ASSEMBLER  LAB6                                                                 09/02/2014 20:26:27 PAGE     5
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+AR0. . . . . . . .  D ADDR   0000H   A   
+CHECK. . . . . . .  C ADDR   2036H   A   
+CHECK2 . . . . . .  C ADDR   0153H   A   
+CMD_WRITE. . . . .  C ADDR   2000H   A   
+COMEAGAIN. . . . .  C ADDR   204AH   A   
+DATASTORE. . . . .  C ADDR   3000H   A   
+DATA_WRITE . . . .  C ADDR   200DH   A   
+DELAYLOOP. . . . .  C ADDR   0148H   A   
+DELAYLOOP2 . . . .  C ADDR   015DH   A   
+DISPLAY_LOOP1. . .  C ADDR   012CH   A   
+EA . . . . . . . .  B ADDR   00A8H.7 A   
+EN . . . . . . . .  B ADDR   0080H.2 A   
+ES . . . . . . . .  B ADDR   00A8H.4 A   
+EXIT . . . . . . .  C ADDR   003BH   A   
+GO_ON. . . . . . .  C ADDR   0142H   A   
+INIT_LCD . . . . .  C ADDR   201AH   A   
+LCD_READY. . . . .  C ADDR   202FH   A   
+LOOP . . . . . . .  C ADDR   2042H   A   
+MAIN . . . . . . .  C ADDR   0123H   A   
+P0 . . . . . . . .  D ADDR   0080H   A   
+P1 . . . . . . . .  D ADDR   0090H   A   
+P2 . . . . . . . .  D ADDR   00A0H   A   
+READ_SWITCHES. . .  C ADDR   013AH   A   
+RECEIVE. . . . . .  C ADDR   0034H   A   
+RECEIVE_DONE . . .  C ADDR   0184H   A   
+RI . . . . . . . .  B ADDR   0098H.0 A   
+RS . . . . . . . .  B ADDR   0080H.0 A   
+RW . . . . . . . .  B ADDR   0080H.1 A   
+SBUF . . . . . . .  D ADDR   0099H   A   
+SCON . . . . . . .  D ADDR   0098H   A   
+SEND_LOOP. . . . .  C ADDR   016AH   A   
+SEND_LOOP1 . . . .  C ADDR   016EH   A   
+SERIAL_ISR . . . .  C ADDR   0023H   A   
+SETUP. . . . . . .  C ADDR   0100H   A   
+TENMSDELAY . . . .  C ADDR   2040H   A   
+TF0. . . . . . . .  B ADDR   0088H.5 A   
+TH0. . . . . . . .  D ADDR   008CH   A   
+TH1. . . . . . . .  D ADDR   008DH   A   
+TI . . . . . . . .  B ADDR   0098H.1 A   
+TL0. . . . . . . .  D ADDR   008AH   A   
+TMOD . . . . . . .  D ADDR   0089H   A   
+TR0. . . . . . . .  B ADDR   0088H.4 A   
+TR1. . . . . . . .  B ADDR   0088H.6 A   
+TRANSMIT . . . . .  C ADDR   0165H   A   
+TRANSMIT_DISPLAY .  C ADDR   0128H   A   
+WAIT . . . . . . .  C ADDR   0175H   A   
+WRITE_RECEIVED . .  C ADDR   018BH   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  0 WARNING(S), 0 ERROR(S)

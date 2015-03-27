@@ -1,0 +1,90 @@
+A51 MACRO ASSEMBLER  BYTE_TO_HEX                                                          08/04/2014 13:09:23 PAGE     1
+
+
+MACRO ASSEMBLER A51 V8.02b
+NO OBJECT MODULE REQUESTED
+ASSEMBLER INVOKED BY: C:\Keil\C51\BIN\A51.EXE C:\Users\Utkarsh\Downloads\byte_to_hex.asm SET(SMALL) DEBUG PRINT(.\byte_t
+                      o_hex.lst) OBJECT(.\byte_to_hex.obj) EP
+
+LOC  OBJ            LINE     SOURCE
+
+                       1     byte_to_hex
+*** _________________________^
+*** ERROR #A9 IN 1 (C:\Users\Utkarsh\Downloads\byte_to_hex.asm, LINE 1): SYNTAX ERROR
+0000 F5F0              2     mov b,a
+0002 54F0              3     anl a,#0f0h
+0004 C4                4     swap a
+0005 B40A22            5     cjne a,#0ah,neq  ;kyun bhai? 1010 ke equal nhi hai toh number kyun hai? aur eqal hai toh char kyun hai?
+0008 802A              6     jmp character
+                       7     
+000A                   8     next:
+000A F570              9     mov 70h,a
+000C E5F0             10     mov a,b
+000E 540F             11     anl a,#0fh
+0010 B40A0D           12     cjne a,#0ah,neq1
+0013 8006             13     jmp character1
+                      14     
+0015                  15     next1:
+0015 F5F0             16     mov b,a
+0017 E570             17     mov a,70h
+0019 801E             18     jmp exitlabel
+                      19     
+                      20     
+001B                  21     character1:
+001B 2437             22     add a,#37h
+001D 80F6             23     jmp next1
+001F 22               24     ret
+                      25     
+0020                  26     neq1:
+0020 4003             27     jc number1
+0022 80F7             28     jmp character1
+0024 22               29     ret
+                      30     
+0025                  31     number1:
+0025 2430             32     add a,#30h
+0027 80EC             33     jmp next1
+0029 22               34     ret
+                      35     
+002A                  36     neq:
+002A 4003             37     jc numb
+002C 8006             38     jmp character
+002E 22               39     ret
+                      40     
+002F                  41     numb:
+002F 2430             42     add a,#30h
+0031 80D7             43     jmp next
+0033 22               44     ret
+                      45     
+0034                  46     character:
+0034 2441             47     add a,#41h
+0036 80D2             48     jmp next
+0038 22               49     ret
+                      50     
+0039                  51     exitlabel:
+0039 22               52     ret
+*** WARNING #A41 IN 52 (C:\Users\Utkarsh\Downloads\byte_to_hex.asm, LINE 52): MISSING 'END' STATEMENT
+A51 MACRO ASSEMBLER  BYTE_TO_HEX                                                          08/04/2014 13:09:23 PAGE     2
+
+SYMBOL TABLE LISTING
+------ ----- -------
+
+
+N A M E             T Y P E  V A L U E   ATTRIBUTES
+
+B. . . . . . . . .  D ADDR   00F0H   A   
+BYTE_TO_HEX. . . .    ----   -----       
+CHARACTER. . . . .  C ADDR   0034H   A   
+CHARACTER1 . . . .  C ADDR   001BH   A   
+EXITLABEL. . . . .  C ADDR   0039H   A   
+NEQ. . . . . . . .  C ADDR   002AH   A   
+NEQ1 . . . . . . .  C ADDR   0020H   A   
+NEXT . . . . . . .  C ADDR   000AH   A   
+NEXT1. . . . . . .  C ADDR   0015H   A   
+NUMB . . . . . . .  C ADDR   002FH   A   
+NUMBER1. . . . . .  C ADDR   0025H   A   
+
+
+REGISTER BANK(S) USED: 0 
+
+
+ASSEMBLY COMPLETE.  1 WARNING(S), 1 ERROR(S)
